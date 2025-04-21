@@ -25,6 +25,8 @@ Route::post('price-history/save', [PriceHistoryController::class, 'store']);
 Route::put('price-history/update/{id}', [PriceHistoryController::class, 'update']);
 Route::delete('price-history/delete/{id}', [PriceHistoryController::class, 'destroy']);
 
+
+
 // PropertyAmenity routes
 Route::get('property-amenities/findall', [PropertyAmenityController::class, 'index']);
 Route::get('property-amenities/findbyid/{property_id}/{amenity_id}', [PropertyAmenityController::class, 'show']);
