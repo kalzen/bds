@@ -2,47 +2,78 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $table = 'users';
+
     protected $fillable = [
-        'name',
+        'full_name',
         'email',
+        'phone',
         'password',
+        'role',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
-        'password',
+        'password_hash',
         'remember_token',
     ];
 
+    public $timestamps = true;
+
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Set the user's password hash.
      */
-    protected function casts(): array
+    public function setPassword(string $password): void
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        $this->password_hash = Hash::make($password);
+    }
+
+    /**
+     * Verify the user's password.
+     */
+    public function verifyPassword(string $password): bool
+    {
+        return Hash::check($password, $this->password_hash);
+    }
+
+    /**
+     * Set the user's password.
+     */
+    public function setPasswordAttribute(string $password): void
+    {
+        $this->attributes['password_hash'] = Hash::make($password);
+    }
+
+    /**
+     * Get the user's password.
+     */
+    public function getPasswordAttribute(): string
+    {
+        return $this->password_hash;
+    }
+
+
+    /**
+     * Check if the user's email is verified.
+     */
+    public function hasVerifiedEmail(): bool
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    /**
+     * Mark the user's email as verified.
+     */
+    public function markEmailAsVerified(): void
+    {
+        $this->email_verified_at = now();
+        $this->save();
     }
 }

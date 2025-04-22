@@ -3,48 +3,52 @@
 namespace App\Http\Controllers;
 
 use App\Models\Amenity;
-use App\Services\AmenityService;
-use App\DTO\AmenityDTO;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class AmenityController extends Controller
 {
-    protected $amenityService;
-
-    public function __construct(AmenityService $amenityService)
-    {
-        $this->amenityService = $amenityService;
-    }
-
     public function index()
     {
-        return response()->json(Amenity::all());
-    }
+        $amenities = Amenity::all();
 
-    public function store(Request $request)
-    {
-        $data = $request->all();
-        $amenity = $this->amenityService->createAmenity($data);
-        return response()->json($amenity, 201);
+        return Inertia::render('Amenities/Index', [
+            "amenities" => $amenities,
+            "emptyMessage" => $amenities->isEmpty() ? "Không có tiện ích nào" : null
+        ]);
     }
 
     public function show($id)
     {
-        $amenity = $this->amenityService->getAmenityById($id);
+        $amenity = Amenity::findOrFail($id);
         return response()->json($amenity);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $amenity = Amenity::create($validated);
+        return response()->json($amenity, 201);
     }
 
     public function update(Request $request, $id)
     {
-        $data = $request->all();
-        $amenity = $this->amenityService->updateAmenity($id, $data);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $amenity = Amenity::findOrFail($id);
+        $amenity->update($validated);
         return response()->json($amenity);
     }
 
     public function destroy($id)
     {
-        $this->amenityService->deleteAmenity($id);
+        $amenity = Amenity::findOrFail($id);
+        $amenity->delete();
         return response()->json(null, 204);
     }
 }
-
