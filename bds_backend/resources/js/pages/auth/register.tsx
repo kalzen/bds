@@ -12,6 +12,8 @@ import AuthLayout from '@/layouts/auth-layout';
 type RegisterForm = {
     full_name: string;
     email: string;
+    phone: string;
+    role: string;
     password: string;
     password_confirmation: string;
 };
@@ -20,6 +22,8 @@ export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
         full_name: '',
         email: '',
+        phone: '',
+        role: '',
         password: '',
         password_confirmation: '',
     });
@@ -41,7 +45,6 @@ export default function Register() {
                         <Input
                             id="full_name"
                             type="text"
-                            required
                             autoFocus
                             tabIndex={1}
                             autoComplete="name"
@@ -58,7 +61,6 @@ export default function Register() {
                         <Input
                             id="email"
                             type="email"
-                            required
                             tabIndex={2}
                             autoComplete="email"
                             value={data.email}
@@ -70,12 +72,41 @@ export default function Register() {
                     </div>
 
                     <div className="grid gap-2">
+                        <Label htmlFor="phone">Phone Number</Label>
+                        <Input
+                            id="phone"
+                            type="tel"
+                            tabIndex={3}
+                            autoComplete="tel"
+                            value={data.phone}
+                            onChange={(e) => setData('phone', e.target.value)}
+                            disabled={processing}
+                            placeholder="e.g. 0901234567"
+                        />
+                        <InputError message={errors.phone} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="role">Role</Label>
+                        <Input
+                            id="role"
+                            type="text"
+                            tabIndex={4}
+                            autoComplete="off"
+                            value={data.role}
+                            onChange={(e) => setData('role', e.target.value)}
+                            disabled={processing}
+                            placeholder="e.g. admin, user, staff"
+                        />
+                        <InputError message={errors.role} />
+                    </div>
+
+                    <div className="grid gap-2">
                         <Label htmlFor="password">Password</Label>
                         <Input
                             id="password"
                             type="password"
-                            required
-                            tabIndex={3}
+                            tabIndex={5}
                             autoComplete="new-password"
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
@@ -90,8 +121,7 @@ export default function Register() {
                         <Input
                             id="password_confirmation"
                             type="password"
-                            required
-                            tabIndex={4}
+                            tabIndex={6}
                             autoComplete="new-password"
                             value={data.password_confirmation}
                             onChange={(e) => setData('password_confirmation', e.target.value)}
@@ -101,7 +131,7 @@ export default function Register() {
                         <InputError message={errors.password_confirmation} />
                     </div>
 
-                    <Button type="submit" className="mt-2 w-full" tabIndex={5} disabled={processing}>
+                    <Button type="submit" className="mt-2 w-full" tabIndex={7} disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                         Create account
                     </Button>
@@ -109,7 +139,7 @@ export default function Register() {
 
                 <div className="text-muted-foreground text-center text-sm">
                     Already have an account?{' '}
-                    <TextLink href={route('login')} tabIndex={6}>
+                    <TextLink href={route('login')} tabIndex={8}>
                         Log in
                     </TextLink>
                 </div>
