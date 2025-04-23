@@ -13,6 +13,7 @@ return new class extends Migration {
 
             $table->bigInteger('value')->nullable();
             $table->primary(['property_id', 'amenity_id']);
+            $table->timestamps();
         });
     }
 

@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->string('direction', 50);
             $table->string('furniture')->nullable();
             $table->timestamps();
+
         });
     }
 

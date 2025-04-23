@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Ward;
 use App\Services\WardService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class WardController extends Controller
 {
-    protected $service;
+    protected WardService $service;
 
     public function __construct(WardService $service)
     {
@@ -17,29 +18,54 @@ class WardController extends Controller
 
     public function index()
     {
-        return response()->json(Ward::all());
+        $wards = Ward::all();
+
+        return Inertia::render('Wards/Index', [
+            'wards' => $wards,
+            'emptyMessage' => $wards->isEmpty() ? 'Không có phường nào.' : null,
+        ]);
     }
 
-    public function show($id)
+    public function create()
     {
-        return response()->json($this->service->getWardById($id));
+        return Inertia::render('Wards/Create');
     }
 
     public function store(Request $request)
     {
-        $data = $request->all();
-        return response()->json($this->service->createWard($data), 201);
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $this->service->create($data);
+
+        return redirect()->route('wards.index')->with('success', 'Phường đã được tạo.');
+    }
+
+    public function edit($id)
+    {
+        $ward = $this->service->getById($id);
+
+        return Inertia::render('Wards/Edit', [
+            'ward' => $ward,
+        ]);
     }
 
     public function update(Request $request, $id)
     {
-        $data = $request->all();
-        return response()->json($this->service->updateWard($id, $data));
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $this->service->update($id, $data);
+
+        return redirect()->route('wards.index')->with('success', 'Cập nhật thành công.');
     }
 
     public function destroy($id)
     {
-        $this->service->deleteWard($id);
-        return response()->json(null, 204);
+        $this->service->delete($id);
+
+        return redirect()->route('wards.index')->with('success', 'Đã xoá phường.');
     }
 }

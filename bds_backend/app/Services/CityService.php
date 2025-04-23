@@ -6,6 +6,7 @@ use App\Models\City;
 
 class CityService
 {
+
     public function create(array $data)
     {
         return City::create($data);
@@ -23,15 +24,15 @@ class CityService
 
     public function update($id, array $data)
     {
-        $city = City::findOrFail($id);
-        $city->update($data);
-        return $city;
+        $attribute = City::findOrFail($id);
+        $attribute->update($data);
+        return $attribute;
     }
 
     public function delete($id)
     {
-        $city = City::findOrFail($id);
-        $city->delete();
+        $attribute = City::findOrFail($id);
+        $attribute->delete();
         return true;
     }
 }

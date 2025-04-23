@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\PropertyCategory;
 use App\Services\PropertyCategoryService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class PropertyCategoryController extends Controller
 {
-    protected $service;
+    protected PropertyCategoryService $service;
 
     public function __construct(PropertyCategoryService $service)
     {
@@ -17,29 +18,54 @@ class PropertyCategoryController extends Controller
 
     public function index()
     {
-        return response()->json(PropertyCategory::all());
+        $categories = PropertyCategory::all();
+
+        return Inertia::render('PropertyCategories/Index', [
+            'categories' => $categories,
+            'emptyMessage' => $categories->isEmpty() ? 'Không có danh mục nào.' : null,
+        ]);
     }
 
-    public function show($id)
+    public function create()
     {
-        return response()->json($this->service->getPropertyCategoryById($id));
+        return Inertia::render('PropertyCategories/Create');
     }
 
     public function store(Request $request)
     {
-        $data = $request->all();
-        return response()->json($this->service->createPropertyCategory($data), 201);
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $this->service->create($data);
+
+        return redirect()->route('property-categories.index')->with('success', 'Danh mục đã được tạo.');
+    }
+
+    public function edit($id)
+    {
+        $category = $this->service->getById($id);
+
+        return Inertia::render('PropertyCategories/Edit', [
+            'category' => $category,
+        ]);
     }
 
     public function update(Request $request, $id)
     {
-        $data = $request->all();
-        return response()->json($this->service->updatePropertyCategory($id, $data));
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $this->service->update($id, $data);
+
+        return redirect()->route('property-categories.index')->with('success', 'Cập nhật thành công.');
     }
 
     public function destroy($id)
     {
-        $this->service->deletePropertyCategory($id);
-        return response()->json(null, 204);
+        $this->service->delete($id);
+
+        return redirect()->route('property-categories.index')->with('success', 'Đã xoá danh mục.');
     }
 }

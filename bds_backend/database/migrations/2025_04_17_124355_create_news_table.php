@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('category_id')->constrained('news_categories','id')->onDelete('cascade');
             $table->date('publish_date');
+            $table->timestamps();
         });
     }
 

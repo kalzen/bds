@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Property;
 use App\Models\PropertyAmenity;
 use App\Services\PropertyAmenityService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class PropertyAmenityController extends Controller
 {
-    protected $service;
+    protected PropertyAmenityService $service;
 
     public function __construct(PropertyAmenityService $service)
     {
@@ -18,29 +18,54 @@ class PropertyAmenityController extends Controller
 
     public function index()
     {
-        return response()->json(PropertyAmenity::all());
+        $amenities = PropertyAmenity::all();
+
+        return Inertia::render('PropertyAmenities/Index', [
+            'amenities' => $amenities,
+            'emptyMessage' => $amenities->isEmpty() ? 'Không có tiện ích nào.' : null,
+        ]);
     }
 
-    public function show($id)
+    public function create()
     {
-        return response()->json($this->service->getPropertyAmenityById($id));
+        return Inertia::render('PropertyAmenities/Create');
     }
 
     public function store(Request $request)
     {
-        $data = $request->all();
-        return response()->json($this->service->createPropertyAmenity($data), 201);
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $this->service->create($data);
+
+        return redirect()->route('property-amenities.index')->with('success', 'Tiện ích đã được tạo.');
+    }
+
+    public function edit($id)
+    {
+        $amenity = $this->service->getById($id);
+
+        return Inertia::render('PropertyAmenities/Edit', [
+            'amenity' => $amenity,
+        ]);
     }
 
     public function update(Request $request, $id)
     {
-        $data = $request->all();
-        return response()->json($this->service->updatePropertyAmenity($id, $data));
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $this->service->update($id, $data);
+
+        return redirect()->route('property-amenities.index')->with('success', 'Cập nhật thành công.');
     }
 
     public function destroy($id)
     {
-        $this->service->deletePropertyAmenity($id);
-        return response()->json(null, 204);
+        $this->service->delete($id);
+
+        return redirect()->route('property-amenities.index')->with('success', 'Đã xoá tiện ích.');
     }
 }

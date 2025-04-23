@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->string('name');
             $table->string('data_type', 50);
             $table->string('unit', 50)->nullable();
+            $table->timestamps();
         });
     }
 

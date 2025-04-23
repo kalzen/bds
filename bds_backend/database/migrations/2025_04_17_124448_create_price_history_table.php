@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->foreignId('property_id')->constrained('properties')->onDelete('cascade');
             $table->decimal('price', 15, 2);
             $table->timestamp('changed_at')->useCurrent();
+            $table->timestamps();
         });
     }
 

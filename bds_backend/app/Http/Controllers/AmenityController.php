@@ -3,52 +3,75 @@
 namespace App\Http\Controllers;
 
 use App\Models\Amenity;
+use App\Services\AmenityService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class AmenityController extends Controller
 {
+    protected AmenityService $amenityService;
+
+    public function __construct(AmenityService $amenityService)
+    {
+        $this->amenityService = $amenityService;
+    }
+
+    // ✅ Index - list amenities
     public function index()
     {
         $amenities = Amenity::all();
 
         return Inertia::render('Amenities/Index', [
-            "amenities" => $amenities,
-            "emptyMessage" => $amenities->isEmpty() ? "Không có tiện ích nào" : null
+            'amenities' => $amenities,
+            'emptyMessage' => $amenities->isEmpty() ? 'Không có tiện ích nào.' : null,
         ]);
     }
 
-    public function show($id)
+    // ✅ Show create form
+    public function create()
     {
-        $amenity = Amenity::findOrFail($id);
-        return response()->json($amenity);
+        return Inertia::render('Amenities/Create');
     }
 
+    // ✅ Store amenity
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $data = $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
-        $amenity = Amenity::create($validated);
-        return response()->json($amenity, 201);
+        $this->amenityService->create($data);
+
+        return redirect()->route('amenities.index')->with('success', 'Tiện ích đã được tạo.');
     }
 
+    // ✅ Show edit form
+    public function edit($id)
+    {
+        $amenity = $this->amenityService->getById($id);
+
+        return Inertia::render('Amenities/Edit', [
+            'amenity' => $amenity,
+        ]);
+    }
+
+    // ✅ Update amenity
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
+        $data = $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
-        $amenity = Amenity::findOrFail($id);
-        $amenity->update($validated);
-        return response()->json($amenity);
+        $this->amenityService->update($id, $data);
+
+        return redirect()->route('amenities.index')->with('success', 'Cập nhật thành công.');
     }
 
+    // ✅ Delete amenity
     public function destroy($id)
     {
-        $amenity = Amenity::findOrFail($id);
-        $amenity->delete();
-        return response()->json(null, 204);
+        $this->amenityService->delete($id);
+
+        return redirect()->route('amenities.index')->with('success', 'Đã xoá tiện ích.');
     }
 }

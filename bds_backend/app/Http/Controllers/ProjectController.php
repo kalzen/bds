@@ -3,43 +3,77 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
-use Illuminate\Http\Request;
 use App\Services\ProjectService;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ProjectController extends Controller
 {
-    protected $projectService;
+    protected ProjectService $projectService;
 
     public function __construct(ProjectService $projectService)
     {
         $this->projectService = $projectService;
     }
 
+    // ✅ Index - list projects
     public function index()
     {
-        return response()->json(Project::all());
+        $projects = Project::all();
+
+        return Inertia::render('Projects/Index', [
+            'projects' => $projects,
+            'emptyMessage' => $projects->isEmpty() ? 'Không có dự án nào.' : null,
+        ]);
     }
 
+    // ✅ Show create form
+    public function create()
+    {
+        return Inertia::render('Projects/Create');
+    }
+
+    // ✅ Store project
     public function store(Request $request)
     {
-        $data = $request->all();
-        return response()->json($this->projectService->createProject($data), 201);
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $this->projectService->create($data);
+
+        return redirect()->route('projects.index')->with('success', 'Dự án đã được tạo.');
     }
 
-    public function show($id)
+    // ✅ Show edit form
+    public function edit($id)
     {
-        return response()->json($this->projectService->getProjectById($id));
+        $project = $this->projectService->getById($id);
+
+        return Inertia::render('Projects/Edit', [
+            'project' => $project,
+        ]);
     }
 
+    // ✅ Update project
     public function update(Request $request, $id)
     {
-        $data = $request->all();
-        return response()->json($this->projectService->updateProject($id, $data));
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $this->projectService->update($id, $data);
+
+        return redirect()->route('projects.index')->with('success', 'Cập nhật thành công.');
     }
 
+    // ✅ Delete project
     public function destroy($id)
     {
-        $this->projectService->deleteProject($id);
-        return response()->json(null, 204);
+        $this->projectService->delete($id);
+
+        return redirect()->route('projects.index')->with('success', 'Đã xoá dự án.');
     }
 }
