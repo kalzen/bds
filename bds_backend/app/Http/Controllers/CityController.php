@@ -21,19 +21,12 @@ class CityController extends Controller
     {
         $cities = City::all();
 
-        return Inertia::render('Cities/Index', [
+        return Inertia::render('location/location', [
             'cities' => $cities,
             'emptyMessage' => $cities->isEmpty() ? 'Không có thành phố nào.' : null,
         ]);
     }
 
-    // ✅ Show create form
-    public function create()
-    {
-        return Inertia::render('Cities/Create');
-    }
-
-    // ✅ Store city
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -42,20 +35,9 @@ class CityController extends Controller
 
         $this->cityService->create($data);
 
-        return redirect()->route('cities.index')->with('success', 'Thành phố đã được tạo.');
+        return redirect()->route('location')->with('success', 'Thành phố đã được tạo.');
     }
 
-    // ✅ Show edit form
-    public function edit($id)
-    {
-        $city = $this->cityService->getById($id);
-
-        return Inertia::render('Cities/Edit', [
-            'city' => $city,
-        ]);
-    }
-
-    // ✅ Update city
     public function update(Request $request, $id)
     {
         $data = $request->validate([
@@ -64,14 +46,14 @@ class CityController extends Controller
 
         $this->cityService->update($id, $data);
 
-        return redirect()->route('cities.index')->with('success', 'Cập nhật thành công.');
+        return redirect()->route('location')->with('success', 'Cập nhật thành công.');
     }
 
-    // ✅ Delete city
     public function destroy($id)
     {
         $this->cityService->delete($id);
 
-        return redirect()->route('cities.index')->with('success', 'Đã xoá thành phố.');
+        return redirect()->route('location')->with('success', 'Đã xoá thành phố.');
     }
+
 }

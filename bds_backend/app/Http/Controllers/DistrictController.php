@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\District;
 use App\Services\DistrictService;
+use Illuminate\Container\Attributes\Log;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -17,15 +18,21 @@ class DistrictController extends Controller
     }
 
     // ✅ Index - list districts
-    public function index()
+    public function location()
     {
-        $districts = District::all();
+        $districts = District::with('city')->get();
+        $cities = City::all();
+        Log::debug('Districts Data: ', ['districts' => $districts->toArray()]);
 
-        return Inertia::render('Districts/Index', [
+        return Inertia::render('location/location', [
             'districts' => $districts,
-            'emptyMessage' => $districts->isEmpty() ? 'Không có quận nào.' : null,
+            'cities' => $cities,
+            'filters' => request()->only('search', 'city_id'), // nếu có filter search
+            'emptyMessage' => 'Không có quận nào.',
         ]);
     }
+
+
 
     // ✅ Show create form
     public function create()

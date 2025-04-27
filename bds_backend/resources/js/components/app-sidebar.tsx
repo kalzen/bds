@@ -9,8 +9,38 @@ import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Trang chủ',
         href: '/dashboard',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Quản lý danh sách bất động sản',
+        href: '/location',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Quản lý danh sách bài viết',
+        href: '/location',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Quản lý danh sách dự án',
+        href: '/location',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Quản lý hạng mục dự án',
+        href: '/location',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Quản lý tiện ích bất động sản',
+        href: '/location',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Quản lý vị trí bất động sản',
+        href: '/location',
         icon: LayoutGrid,
     },
 ];
@@ -35,7 +65,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
+                            <Link href="/location" prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

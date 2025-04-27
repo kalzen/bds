@@ -10,7 +10,9 @@ interface CityFormProps {
         id: number;
         name: string;
     };
-    cities: { id: number; name: string }[];
+    cities: {
+        id: number; name: string
+    }[];
 }
 
 export default function CityForm({ city, cities }: CityFormProps) {
