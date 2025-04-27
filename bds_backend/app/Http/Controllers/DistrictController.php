@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\District;
+use App\Models\City;
 use App\Services\DistrictService;
-use Illuminate\Container\Attributes\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class DistrictController extends Controller
@@ -18,67 +19,73 @@ class DistrictController extends Controller
     }
 
     // ✅ Index - list districts
-    public function location()
+    public function index(Request $request)
     {
-        $districts = District::with('city')->get();
-        $cities = City::all();
-        Log::debug('Districts Data: ', ['districts' => $districts->toArray()]);
+        $query = District::with('city');
 
+        if ($search = $request->input('search')) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        if ($cityId = $request->input('city_id')) {
+            $query->where('city_id', $cityId);
+        }
+
+
+        $districts = $query->get();
+        $cities = City::all();
+        Log::debug("quan thuoc thanh pho: " . $districts);
+        Log::debug("thanh pho: " . $cities);
         return Inertia::render('location/location', [
             'districts' => $districts,
             'cities' => $cities,
-            'filters' => request()->only('search', 'city_id'), // nếu có filter search
+            'filters' => $request->only('search', 'city_id'),
             'emptyMessage' => 'Không có quận nào.',
         ]);
     }
 
-
-
-    // ✅ Show create form
-    public function create()
-    {
-        return Inertia::render('Districts/Create');
-    }
-
-    // ✅ Store district
+    // ✅ Store - create new district
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'city_id' => 'required|exists:cities,id',
         ]);
 
-        $this->districtService->create($data);
+        District::create($validated);
 
-        return redirect()->route('districts.index')->with('success', 'Quận đã được tạo.');
+        return redirect()->route('location')->with('success', 'Tạo quận thành công!');
     }
 
-    // ✅ Show edit form
-    public function edit($id)
+    // ✅ Edit - show form edit
+    public function edit(District $district)
     {
-        $district = $this->districtService->getById($id);
+        $cities = City::all();
 
-        return Inertia::render('Districts/Edit', [
+        return Inertia::render('location/edit-district', [
             'district' => $district,
+            'cities' => $cities,
         ]);
     }
 
-    // ✅ Update district
-    public function update(Request $request, $id)
+    // ✅ Update - update existing district
+    public function update(Request $request, District $district)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'city_id' => 'required|exists:cities,id',
         ]);
 
-        $this->districtService->update($id, $data);
+        $district->update($validated);
 
-        return redirect()->route('districts.index')->with('success', 'Cập nhật thành công.');
+        return redirect()->route('location')->with('success', 'Cập nhật quận thành công!');
     }
 
-    // ✅ Delete district
-    public function destroy($id)
+    // ✅ Destroy - delete a district
+    public function destroy(District $district)
     {
-        $this->districtService->delete($id);
+        $district->delete();
 
-        return redirect()->route('districts.index')->with('success', 'Đã xoá quận.');
+        return redirect()->route('location')->with('success', 'Xoá quận thành công!');
     }
 }

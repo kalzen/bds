@@ -16,16 +16,6 @@ class WardController extends Controller
         $this->service = $service;
     }
 
-    public function index()
-    {
-        $wards = Ward::all();
-
-        return Inertia::render('Wards/Index', [
-            'wards' => $wards,
-            'emptyMessage' => $wards->isEmpty() ? 'Không có phường nào.' : null,
-        ]);
-    }
-
     public function create()
     {
         return Inertia::render('Wards/Create');
@@ -35,11 +25,12 @@ class WardController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'district_id' => 'required|exists:districts,id',
         ]);
 
         $this->service->create($data);
 
-        return redirect()->route('wards.index')->with('success', 'Phường đã được tạo.');
+        return redirect()->route('location')->with('success', 'Phường đã được tạo.');
     }
 
     public function edit($id)
@@ -59,13 +50,13 @@ class WardController extends Controller
 
         $this->service->update($id, $data);
 
-        return redirect()->route('wards.index')->with('success', 'Cập nhật thành công.');
+        return redirect()->route('location')->with('success', 'Cập nhật thành công.');
     }
 
     public function destroy($id)
     {
         $this->service->delete($id);
 
-        return redirect()->route('wards.index')->with('success', 'Đã xoá phường.');
+        return redirect()->route('location')->with('success', 'Đã xoá phường.');
     }
 }

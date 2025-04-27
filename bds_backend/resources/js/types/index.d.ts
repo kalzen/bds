@@ -49,8 +49,15 @@ export interface City {
     state: string;
     country: string;
 }
+
 export interface District{
     id: number;
     name: string;
     city?: City;
+}
+
+export interface Ward{
+    id: number;
+    name: string;
+    district?: District;
 }

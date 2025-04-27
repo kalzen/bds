@@ -1,7 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler, useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
 
@@ -36,27 +35,26 @@ export default function CityForm({ city, cities }: CityFormProps) {
         e.preventDefault();
 
         if (isEdit && editingCity) {
-            put(route('cities.update', editingCity.id), {
+            put(route('location.cities.update', editingCity.id), {
                 onSuccess: () => {
                     setEditingCity(null); // reset edit state after update
                 },
             });
         } else {
-            post(route('cities.store'));
+            post(route('location.cities.store'));
         }
     };
 
     const handleDelete = (id: number) => {
         if (confirm('Bạn có chắc chắn muốn xoá thành phố này?')) {
-            destroy(route('cities.destroy', id));
+            destroy(route('location.cities.destroy', id));
         }
     };
 
     return (
-        <div>
+        <div className="p-4 space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
                 <div className="grid gap-2">
-                    <Label htmlFor="name">Tên thành phố</Label>
                     <Input
                         id="name"
                         value={data.name}

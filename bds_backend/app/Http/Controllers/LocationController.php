@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\City;
+use App\Models\District;
 use App\Models\Location;
+use App\Models\Ward;
 use App\Services\LocationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,15 +20,46 @@ class LocationController extends Controller
     }
 
     // ✅ Index - list locations
-    public function index()
+    public function index(Request $request)
     {
-        $locations = Location::all();
+        // Lấy cities
+        $cities = City::all();
 
-        return Inertia::render('Locations/Index', [
-            'locations' => $locations,
-            'emptyMessage' => $locations->isEmpty() ? 'Không có địa điểm nào.' : null,
+        // Lấy districts có filter
+        $query = District::with('city');
+
+        if ($search = $request->input('search')) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        if ($cityId = $request->input('city_id')) {
+            $query->where('city_id', $cityId);
+        }
+
+        $districts = $query->get();
+
+        // Lấy wards có filter
+        $wardQuery = Ward::with('district.city');
+
+        if ($search = $request->input('search')) {
+            $wardQuery->where('name', 'like', "%{$search}%");
+        }
+
+        if ($districtId = $request->input('district_id')) {
+            $wardQuery->where('district_id', $districtId);
+        }
+
+        $wards = $wardQuery->get();
+
+        return Inertia::render('location/location', [
+            'cities' => $cities,
+            'districts' => $districts,
+            'wards' => $wards,
+            'filters' => $request->only('search', 'city_id', 'district_id'),
+            'emptyMessage' => 'Không có dữ liệu.',
         ]);
     }
+
 
     // ✅ Show create form
     public function create()
