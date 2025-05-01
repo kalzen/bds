@@ -53,11 +53,32 @@ export interface City {
 export interface District{
     id: number;
     name: string;
-    city?: City;
+    city: City;
 }
 
 export interface Ward{
     id: number;
     name: string;
-    district?: District;
+    district: District;
+}
+
+export interface Amenities{
+    id: number;
+    name: string;
+}
+
+export interface Attributes{
+    id: number;
+    name: string;
+    data_type : string;
+}
+
+export interface ListingType{
+    id: number;
+    name: string;
+}
+
+export interface PropertyCategory{
+    id: number;
+    name: string;
 }

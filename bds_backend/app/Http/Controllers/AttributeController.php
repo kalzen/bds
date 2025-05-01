@@ -36,14 +36,16 @@ class AttributeController extends Controller
     // ✅ Store attribute
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'data_type' => 'required|string|max:255', // 👈 đảm bảo validate & nhận đúng
         ]);
 
-        $this->attributeService->create($data);
+        Attribute::create($validated);
 
-        return redirect()->route('attributes.index')->with('success', 'Thuộc tính đã được tạo.');
+        return redirect()->back()->with('message', 'Thuộc tính đã được tạo.');
     }
+
 
     // ✅ Show edit form
     public function edit($id)
@@ -64,7 +66,7 @@ class AttributeController extends Controller
 
         $this->attributeService->update($id, $data);
 
-        return redirect()->route('attributes.index')->with('success', 'Cập nhật thành công.');
+        return redirect()->route('features')->with('success', 'Cập nhật thành công.');
     }
 
     // ✅ Delete attribute
@@ -72,6 +74,6 @@ class AttributeController extends Controller
     {
         $this->attributeService->delete($id);
 
-        return redirect()->route('attributes.index')->with('success', 'Đã xoá thuộc tính.');
+        return redirect()->route('features')->with('success', 'Đã xoá thuộc tính.');
     }
 }

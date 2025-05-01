@@ -42,7 +42,7 @@ class ListingTypeController extends Controller
 
         $this->listingTypeService->create($data);
 
-        return redirect()->route('listing-types.index')->with('success', 'Loại danh sách đã được tạo.');
+        return redirect()->route('features')->with('success', 'Loại danh sách đã được tạo.');
     }
 
     // ✅ Show edit form
@@ -64,7 +64,7 @@ class ListingTypeController extends Controller
 
         $this->listingTypeService->update($id, $data);
 
-        return redirect()->route('listing-types.index')->with('success', 'Cập nhật thành công.');
+        return redirect()->route('features')->with('success', 'Cập nhật thành công.');
     }
 
     // ✅ Delete listing type
@@ -72,6 +72,6 @@ class ListingTypeController extends Controller
     {
         $this->listingTypeService->delete($id);
 
-        return redirect()->route('listing-types.index')->with('success', 'Đã xoá loại danh sách.');
+        return redirect()->route('features')->with('success', 'Đã xoá loại danh sách.');
     }
 }

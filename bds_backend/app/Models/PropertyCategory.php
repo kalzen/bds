@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class PropertyCategory extends Model
 {
     protected $fillable = [
-        'name',
-        'description',
+        'name'
     ];
 
     public function properties()

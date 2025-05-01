@@ -16,8 +16,11 @@ Route::post('/register', [\App\Http\Controllers\Auth\RegisteredUserController::c
 // 📦 Route cần đăng nhập + email xác minh
 Route::middleware(['auth', 'verified'])->group(function () {
 
-//    Route::get('/dashboard' )->name('dashboard');
+    Route::get('/dashboard', fn() => Inertia::render('dashboard'))->name('dashboard');
+
+//    Route::get('/dashboard', [\App\Http\Controllers\ProjectController::class,'index'])->name('dashboard');
     Route::get('/location', [\App\Http\Controllers\LocationController::class, 'index'])->name('location');
+    Route::get('/features/management', [\App\Http\Controllers\FeaturesManagementController::class, 'index'])->name('features');
 
 
     // Các action riêng cho District ngay trên location
@@ -33,6 +36,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/location/wards', [\App\Http\Controllers\WardController::class, 'store'])->name('location.wards.store');
     Route::put('/location/wards/{ward}', [\App\Http\Controllers\WardController::class, 'update'])->name('location.wards.update');
     Route::delete('/location/wards/{ward}', [\App\Http\Controllers\WardController::class, 'destroy'])->name('location.wards.destroy');
+
+     // Route để thêm, sửa, xóa amenities
+    Route::post('/features/management/amenities/amenities', [\App\Http\Controllers\AmenityController::class, 'store'])->name('features.amenities.store');
+    Route::put('/features/management/amenities/{amenities}', [\App\Http\Controllers\AmenityController::class, 'update'])->name('features.amenities.update');
+    Route::delete('/features/management/amenities/{amenities}', [\App\Http\Controllers\AmenityController::class, 'destroy'])->name('features.amenities.destroy');
+
+    // Route để thêm, sửa, xóa attribute
+    Route::post('/features/management/attribute/attribute', [\App\Http\Controllers\AttributeController::class, 'store'])->name('features.attributes.store');
+    Route::put('/features/management/attribute/{attribute}', [\App\Http\Controllers\AttributeController::class, 'update'])->name('features.attributes.update');
+    Route::delete('/features/management/attribute/{attribute}', [\App\Http\Controllers\AttributeController::class, 'destroy'])->name('features.attributes.destroy');
+
+      // Route để thêm, sửa, xóa listing_types
+    Route::post('/features/management/listing_types/listing_types', [\App\Http\Controllers\ListingTypeController::class, 'store'])->name('features.listing_types.store');
+    Route::put('/features/management/listing_types/{listing_types}', [\App\Http\Controllers\ListingTypeController::class, 'update'])->name('features.listing_types.update');
+    Route::delete('/features/management/listing_types/{listing_types}', [\App\Http\Controllers\ListingTypeController::class, 'destroy'])->name('features.listing_types.destroy');
+
+     // Route để thêm, sửa, xóa property_categories
+    Route::post('/features/management/property_categories/property_categories', [\App\Http\Controllers\PropertyCategoryController::class, 'store'])->name('features.property_categories.store');
+    Route::put('/features/management/property_categories/{property_categories}', [\App\Http\Controllers\PropertyCategoryController::class, 'update'])->name('features.property_categories.update');
+    Route::delete('/features/management/property_categories/{property_categories}', [\App\Http\Controllers\PropertyCategoryController::class, 'destroy'])->name('features.property_categories.destroy');
 
 
 });

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Attribute extends Model
 {
-    protected $fillable = ['name', 'value'];
+    protected $fillable = ['name', 'data_type'];
 
     public function listings()
     {

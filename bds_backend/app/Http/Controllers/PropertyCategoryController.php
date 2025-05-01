@@ -39,7 +39,7 @@ class PropertyCategoryController extends Controller
 
         $this->service->create($data);
 
-        return redirect()->route('property-categories.index')->with('success', 'Danh mục đã được tạo.');
+        return redirect()->route('features')->with('success', 'Danh mục đã được tạo.');
     }
 
     public function edit($id)
@@ -59,13 +59,13 @@ class PropertyCategoryController extends Controller
 
         $this->service->update($id, $data);
 
-        return redirect()->route('property-categories.index')->with('success', 'Cập nhật thành công.');
+        return redirect()->route('features')->with('success', 'Cập nhật thành công.');
     }
 
     public function destroy($id)
     {
         $this->service->delete($id);
 
-        return redirect()->route('property-categories.index')->with('success', 'Đã xoá danh mục.');
+        return redirect()->route('features')->with('success', 'Đã xoá danh mục.');
     }
 }

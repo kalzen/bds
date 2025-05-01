@@ -35,7 +35,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Quản lý tiện ích bất động sản',
-        href: '/location',
+        href: '/features/management',
         icon: LayoutGrid,
     },
     {

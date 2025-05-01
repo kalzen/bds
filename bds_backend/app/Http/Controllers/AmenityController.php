@@ -21,7 +21,7 @@ class AmenityController extends Controller
     {
         $amenities = Amenity::all();
 
-        return Inertia::render('Amenities/Index', [
+        return Inertia::render('amenities/Index', [
             'amenities' => $amenities,
             'emptyMessage' => $amenities->isEmpty() ? 'Không có tiện ích nào.' : null,
         ]);
@@ -30,7 +30,7 @@ class AmenityController extends Controller
     // ✅ Show create form
     public function create()
     {
-        return Inertia::render('Amenities/Create');
+        return Inertia::render('amenities/Create');
     }
 
     // ✅ Store amenity
@@ -42,7 +42,7 @@ class AmenityController extends Controller
 
         $this->amenityService->create($data);
 
-        return redirect()->route('amenities.index')->with('success', 'Tiện ích đã được tạo.');
+        return redirect()->route('features')->with('success', 'Tiện ích đã được tạo.');
     }
 
     // ✅ Show edit form
@@ -50,7 +50,7 @@ class AmenityController extends Controller
     {
         $amenity = $this->amenityService->getById($id);
 
-        return Inertia::render('Amenities/Edit', [
+        return Inertia::render('amenities/Edit', [
             'amenity' => $amenity,
         ]);
     }
@@ -64,7 +64,7 @@ class AmenityController extends Controller
 
         $this->amenityService->update($id, $data);
 
-        return redirect()->route('amenities.index')->with('success', 'Cập nhật thành công.');
+        return redirect()->route('features')->with('success', 'Cập nhật thành công.');
     }
 
     // ✅ Delete amenity
@@ -72,6 +72,6 @@ class AmenityController extends Controller
     {
         $this->amenityService->delete($id);
 
-        return redirect()->route('amenities.index')->with('success', 'Đã xoá tiện ích.');
+        return redirect()->route('features')->with('success', 'Đã xoá tiện ích.');
     }
 }

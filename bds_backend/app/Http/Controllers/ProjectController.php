@@ -21,7 +21,7 @@ class ProjectController extends Controller
     {
         $projects = Project::all();
 
-        return Inertia::render('Projects/Index', [
+        return Inertia::render('dashboard', [
             'projects' => $projects,
             'emptyMessage' => $projects->isEmpty() ? 'Không có dự án nào.' : null,
         ]);
