@@ -18,8 +18,6 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->decimal('price', 15, 2);
             $table->foreignId('attribute_id')->nullable()->constrained('attributes')->onDelete('cascade');
-            $table->string('direction', 50);
-            $table->string('furniture')->nullable();
             $table->timestamps();
 
         });

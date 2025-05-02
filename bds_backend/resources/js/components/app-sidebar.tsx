@@ -15,7 +15,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Quản lý danh sách bất động sản',
-        href: '/location',
+        href: '/properties',
         icon: LayoutGrid,
     },
     {

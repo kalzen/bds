@@ -43,6 +43,30 @@ export interface User {
     [key: string]: unknown;
 }
 
+export interface Property {
+    id: number;
+    user_id?: number; // Optional
+    project_id?: number; // Optional
+    listing_type_id?: number; // Optional
+    category_id?: number; // Optional
+    location_id?: number; // Optional
+    name: string;
+    description: string;
+    price: number;
+    amenities: PropertyAmenity[];
+    attributes: PropertyAttribute[];
+}
+
+export interface PropertyAmenity {
+    amenity: Amenities;
+    value: string;
+}
+
+export interface PropertyAttribute {
+    attribute: Attributes;
+    value: string | number;
+}
+
 export interface City {
     id: number;
     name: string;

@@ -22,6 +22,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/location', [\App\Http\Controllers\LocationController::class, 'index'])->name('location');
     Route::get('/features/management', [\App\Http\Controllers\FeaturesManagementController::class, 'index'])->name('features');
 
+    // Trang danh sách tất cả bất động sản
+    Route::get('/properties', [\App\Http\Controllers\PropertyController::class, 'index'])->name('properties.index');
+
+    // Trang tạo mới bất động sản
+    Route::get('/properties/create', [\App\Http\Controllers\PropertyController::class, 'create'])->name('properties.create');
+
+    // Lưu bất động sản mới
+    Route::post('/properties', [\App\Http\Controllers\PropertyController::class, 'store'])->name('properties.store');
+
+    // Trang chỉnh sửa bất động sản
+    Route::get('/properties/{id}/edit', [\App\Http\Controllers\PropertyController::class, 'edit'])->name('properties.edit');
+
+    // Cập nhật thông tin bất động sản
+    Route::put('/properties/{id}', [\App\Http\Controllers\PropertyController::class, 'update'])->name('properties.update');
+
+    // Xóa bất động sản
+    Route::delete('/properties/{id}', [\App\Http\Controllers\PropertyController::class, 'destroy'])->name('properties.destroy');
 
     // Các action riêng cho District ngay trên location
     Route::post('/location/districts', [\App\Http\Controllers\DistrictController::class, 'store'])->name('location.districts.store');
@@ -37,7 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/location/wards/{ward}', [\App\Http\Controllers\WardController::class, 'update'])->name('location.wards.update');
     Route::delete('/location/wards/{ward}', [\App\Http\Controllers\WardController::class, 'destroy'])->name('location.wards.destroy');
 
-     // Route để thêm, sửa, xóa amenities
+    // Route để thêm, sửa, xóa amenities
     Route::post('/features/management/amenities/amenities', [\App\Http\Controllers\AmenityController::class, 'store'])->name('features.amenities.store');
     Route::put('/features/management/amenities/{amenities}', [\App\Http\Controllers\AmenityController::class, 'update'])->name('features.amenities.update');
     Route::delete('/features/management/amenities/{amenities}', [\App\Http\Controllers\AmenityController::class, 'destroy'])->name('features.amenities.destroy');
@@ -47,12 +64,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/features/management/attribute/{attribute}', [\App\Http\Controllers\AttributeController::class, 'update'])->name('features.attributes.update');
     Route::delete('/features/management/attribute/{attribute}', [\App\Http\Controllers\AttributeController::class, 'destroy'])->name('features.attributes.destroy');
 
-      // Route để thêm, sửa, xóa listing_types
+    // Route để thêm, sửa, xóa listing_types
     Route::post('/features/management/listing_types/listing_types', [\App\Http\Controllers\ListingTypeController::class, 'store'])->name('features.listing_types.store');
     Route::put('/features/management/listing_types/{listing_types}', [\App\Http\Controllers\ListingTypeController::class, 'update'])->name('features.listing_types.update');
     Route::delete('/features/management/listing_types/{listing_types}', [\App\Http\Controllers\ListingTypeController::class, 'destroy'])->name('features.listing_types.destroy');
 
-     // Route để thêm, sửa, xóa property_categories
+    // Route để thêm, sửa, xóa property_categories
     Route::post('/features/management/property_categories/property_categories', [\App\Http\Controllers\PropertyCategoryController::class, 'store'])->name('features.property_categories.store');
     Route::put('/features/management/property_categories/{property_categories}', [\App\Http\Controllers\PropertyCategoryController::class, 'update'])->name('features.property_categories.update');
     Route::delete('/features/management/property_categories/{property_categories}', [\App\Http\Controllers\PropertyCategoryController::class, 'destroy'])->name('features.property_categories.destroy');
@@ -62,3 +79,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
+
