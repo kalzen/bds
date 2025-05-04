@@ -6,15 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class District extends Model
 {
-    protected $fillable = ['name', 'city_id'];
+    protected $fillable = [
+        'name',
+        'type',
+        'slug',
+        'name_with_type',
+        'path',
+        'path_with_type',
+        'code',
+        'parent_code',
+    ];
 
     public function city()
     {
-        return $this->belongsTo(City::class);
+        return $this->belongsTo(Provinces::class, 'parent_code', 'code');
     }
 
-    public function locations()
+    public function wards()
     {
-        return $this->hasMany(Location::class);
+        return $this->hasMany(Ward::class, 'parent_code', 'code');
     }
 }
+

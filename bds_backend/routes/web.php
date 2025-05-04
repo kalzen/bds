@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\CityController;
+use App\Http\Controllers\ProvincesController;
 
 // 🌐 Landing page
 Route::get('/', function () {
@@ -19,7 +19,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', fn() => Inertia::render('dashboard'))->name('dashboard');
 
 //    Route::get('/dashboard', [\App\Http\Controllers\ProjectController::class,'index'])->name('dashboard');
-    Route::get('/location', [\App\Http\Controllers\LocationController::class, 'index'])->name('location');
     Route::get('/features/management', [\App\Http\Controllers\FeaturesManagementController::class, 'index'])->name('features');
 
     // Trang danh sách tất cả bất động sản
@@ -39,20 +38,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Xóa bất động sản
     Route::delete('/properties/{id}', [\App\Http\Controllers\PropertyController::class, 'destroy'])->name('properties.destroy');
-
-    // Các action riêng cho District ngay trên location
-    Route::post('/location/districts', [\App\Http\Controllers\DistrictController::class, 'store'])->name('location.districts.store');
-    Route::put('/location/districts/{district}', [\App\Http\Controllers\DistrictController::class, 'update'])->name('location.districts.update');
-    Route::delete('/location/districts/{district}', [\App\Http\Controllers\DistrictController::class, 'destroy'])->name('location.districts.destroy');
-
-    Route::post('/location/cities', [\App\Http\Controllers\CityController::class, 'store'])->name('location.cities.store');
-    Route::put('/location/cities/{city}', [\App\Http\Controllers\CityController::class, 'update'])->name('location.cities.update');
-    Route::delete('/location/cities/{city}', [\App\Http\Controllers\CityController::class, 'destroy'])->name('location.cities.destroy');
-
-    // Route để thêm, sửa, xóa Ward
-    Route::post('/location/wards', [\App\Http\Controllers\WardController::class, 'store'])->name('location.wards.store');
-    Route::put('/location/wards/{ward}', [\App\Http\Controllers\WardController::class, 'update'])->name('location.wards.update');
-    Route::delete('/location/wards/{ward}', [\App\Http\Controllers\WardController::class, 'destroy'])->name('location.wards.destroy');
 
     // Route để thêm, sửa, xóa amenities
     Route::post('/features/management/amenities/amenities', [\App\Http\Controllers\AmenityController::class, 'store'])->name('features.amenities.store');

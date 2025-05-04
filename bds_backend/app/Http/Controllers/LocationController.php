@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\City;
+use App\Models\Provinces;
 use App\Models\District;
 use App\Models\Location;
 use App\Models\Ward;
@@ -23,7 +23,7 @@ class LocationController extends Controller
     public function index(Request $request)
     {
         // Lấy cities
-        $cities = City::all();
+        $cities = Provinces::all();
 
         // Lấy districts có filter
         $query = District::with('city');

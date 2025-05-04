@@ -14,23 +14,28 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Quản lý danh sách bất động sản',
+        title: 'Quản lý bất động sản',
+        href: '/properties',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Quản lý dự án',
         href: '/properties',
         icon: LayoutGrid,
     },
     {
         title: 'Quản lý danh sách bài viết',
-        href: '/location',
+        href: '/properties',
         icon: LayoutGrid,
     },
     {
         title: 'Quản lý danh sách dự án',
-        href: '/location',
+        href: '/properties',
         icon: LayoutGrid,
     },
     {
         title: 'Quản lý hạng mục dự án',
-        href: '/location',
+        href: '/properties',
         icon: LayoutGrid,
     },
     {
@@ -40,7 +45,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Quản lý vị trí bất động sản',
-        href: '/location',
+        href: '/properties',
         icon: LayoutGrid,
     },
 ];
@@ -65,7 +70,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/location" prefetch>
+                            <Link href="/dashboard" prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

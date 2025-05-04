@@ -51,6 +51,7 @@ export interface Property {
     category_id?: number; // Optional
     location_id?: number; // Optional
     name: string;
+    address: string;
     description: string;
     price: number;
     amenities: PropertyAmenity[];
@@ -67,23 +68,37 @@ export interface PropertyAttribute {
     value: string | number;
 }
 
-export interface City {
+export interface Provinces {
     id: number;
     name: string;
-    state: string;
-    country: string;
+    slug: string;
+    type: string;
+    name_with_type: string;
+    code: string;
 }
 
 export interface District{
-    id: number;
+    id: name;
     name: string;
-    city: City;
+    type: string;
+    slug: string;
+    name_with_type: string;
+    path: string;
+    path_with_type: string;
+    code: string;
+    parent_code: string;
 }
 
 export interface Ward{
     id: number;
     name: string;
-    district: District;
+    type: string;
+    slug: string;
+    name_with_type: string;
+    path: string;
+    path_with_type: string;
+    code: string;
+    parent_code: string;
 }
 
 export interface Amenities{

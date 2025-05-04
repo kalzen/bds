@@ -2,36 +2,36 @@
 
 namespace App\Services;
 
-use App\Models\City;
+use App\Models\Provinces;
 
-class CityService
+class ProvincesService
 {
 
     public function create(array $data)
     {
-        return City::create($data);
+        return Provinces::create($data);
     }
 
     public function getAll()
     {
-        return City::all();
+        return Provinces::all();
     }
 
     public function getById($id)
     {
-        return City::findOrFail($id);
+        return Provinces::findOrFail($id);
     }
 
     public function update($id, array $data)
     {
-        $attribute = City::findOrFail($id);
+        $attribute = Provinces::findOrFail($id);
         $attribute->update($data);
         return $attribute;
     }
 
     public function delete($id)
     {
-        $attribute = City::findOrFail($id);
+        $attribute = Provinces::findOrFail($id);
         $attribute->delete();
         return true;
     }

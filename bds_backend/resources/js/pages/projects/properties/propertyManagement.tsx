@@ -9,73 +9,59 @@ const breadcrumbs = [
         href: '/properties',
     },
 ];
-
-function normalizeProperty(p: any): Property {
-    return {
-        ...p,
-        amenities: p.amenities.map((a: any) => ({
-            amenity: { id: a.id, name: '' },
-            value: a.value,
-        })),
-        attributes: p.attributes.map((attr: any) => ({
-            attribute: { id: attr.id, name: '' },
-            value: attr.value,
-        })),
-    };
-}
-
+console.log("management");
 export default function PropertyManagementPage({
-    property = null, // Sửa giá trị mặc định thành null
+    properties = [],
     categories = [],
     projects = [],
     amenities = [],
+    provinces = [],
+    districts = [],
+    wards = [],
     listing_types = [],
-    auth, // 👈 thêm dòng này
+    emptyMessage = 'Không có bất động sản nào.',
+    auth,
 }: {
-    property?: {
-        id: number;
-        name: string;
-        price: number;
-        area: number;
-        address: string;
-        description: string;
-        category_id: number;
-        project_id: number;
-        amenities: {
-            id: number;
-            value: string | number;
-        }[];
-        attributes: {
-            id: number;
-            value: string | number;
-        }[];
-    } | null; // Cho phép property là null
+
+    properties: Property[];
     categories: { id: number; name: string }[];
     projects: { id: number; name: string }[];
     amenities: { id: number; name: string }[];
+    provinces: { id: number; name: string; code: string }[];
+    districts: { id: number; name: string; code: string; parent_code: string }[];
+    wards: { id: number; name: string; code: string; parent_code: string }[];
     listing_types: { id: number; name: string }[];
+    emptyMessage: string | null;
     auth: {
         user: {
             id: number;
             name: string;
-            // Thêm các trường khác nếu cần
         };
     };
+
 }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={property ? 'Chỉnh sửa bất động sản' : 'Tạo bất động sản mới'} />
+            <Head title="Quản lý bất động sản" />
+
             <div className="flex h-full flex-col gap-4 rounded-xl p-4">
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border p-4 md:min-h-min">
                     <PropertyForm
-                        properties={property ? [normalizeProperty(property)] : []}
+                        properties={properties}
                         categories={categories}
                         projects={projects}
                         amenities={amenities}
+                        provinces={provinces}
+                        districts={districts}
+                        wards={wards}
                         listingTypes={listing_types}
-                        currentUserId={auth.user.id} // 👈 Gửi user_id
+                        currentUserId={auth.user.id}
                     />
+                    {properties.length === 0 && (
+                        <div className="text-center text-gray-500 mt-4">{emptyMessage}</div>
+                    )}
                 </div>
+
             </div>
         </AppLayout>
     );

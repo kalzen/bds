@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\City;
-use App\Services\CityService;
+use App\Models\Provinces;
+use App\Services\ProvincesService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class CityController extends Controller
+class ProvincesController extends Controller
 {
-    protected CityService $cityService;
+    protected ProvincesService $cityService;
 
-    public function __construct(CityService $cityService)
+    public function __construct(ProvincesService $cityService)
     {
         $this->cityService = $cityService;
     }
@@ -19,7 +19,7 @@ class CityController extends Controller
     // ✅ Index - list cities
     public function index()
     {
-        $cities = City::all();
+        $cities = Provinces::all();
 
         return Inertia::render('location/location', [
             'cities' => $cities,

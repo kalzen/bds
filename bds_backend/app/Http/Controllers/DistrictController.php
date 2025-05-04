@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\District;
-use App\Models\City;
+use App\Models\Provinces;
 use App\Services\DistrictService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -33,7 +33,7 @@ class DistrictController extends Controller
 
 
         $districts = $query->get();
-        $cities = City::all();
+        $cities = Provinces::all();
         Log::debug("quan thuoc thanh pho: " . $districts);
         Log::debug("thanh pho: " . $cities);
         return Inertia::render('location/location', [
@@ -60,7 +60,7 @@ class DistrictController extends Controller
     // ✅ Edit - show form edit
     public function edit(District $district)
     {
-        $cities = City::all();
+        $cities = Provinces::all();
 
         return Inertia::render('location/edit-district', [
             'district' => $district,

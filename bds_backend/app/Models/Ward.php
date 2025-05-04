@@ -8,13 +8,17 @@ class Ward extends Model
 {
     protected $fillable = [
         'name',
-        'district_id',
+        'type',
+        'slug',
+        'name_with_type',
+        'path',
+        'path_with_type',
+        'code',
+        'parent_code',
     ];
 
     public function district()
     {
-        return $this->belongsTo(District::class);
+        return $this->belongsTo(District::class, 'parent_code', 'code');
     }
-
 }
-
