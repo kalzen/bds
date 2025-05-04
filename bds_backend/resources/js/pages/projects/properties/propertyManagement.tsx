@@ -9,12 +9,13 @@ const breadcrumbs = [
         href: '/properties',
     },
 ];
-console.log("management");
+console.log('management');
 export default function PropertyManagementPage({
     properties = [],
     categories = [],
     projects = [],
     amenities = [],
+    attributes = [],
     provinces = [],
     districts = [],
     wards = [],
@@ -22,11 +23,11 @@ export default function PropertyManagementPage({
     emptyMessage = 'Không có bất động sản nào.',
     auth,
 }: {
-
     properties: Property[];
     categories: { id: number; name: string }[];
     projects: { id: number; name: string }[];
     amenities: { id: number; name: string }[];
+    attributes: { id: number; name: string }[];
     provinces: { id: number; name: string; code: string }[];
     districts: { id: number; name: string; code: string; parent_code: string }[];
     wards: { id: number; name: string; code: string; parent_code: string }[];
@@ -38,7 +39,6 @@ export default function PropertyManagementPage({
             name: string;
         };
     };
-
 }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -51,17 +51,15 @@ export default function PropertyManagementPage({
                         categories={categories}
                         projects={projects}
                         amenities={amenities}
+                        attributes={attributes}
                         provinces={provinces}
                         districts={districts}
                         wards={wards}
                         listingTypes={listing_types}
                         currentUserId={auth.user.id}
                     />
-                    {properties.length === 0 && (
-                        <div className="text-center text-gray-500 mt-4">{emptyMessage}</div>
-                    )}
+                    {properties.length === 0 && <div className="mt-4 text-center text-gray-500">{emptyMessage}</div>}
                 </div>
-
             </div>
         </AppLayout>
     );

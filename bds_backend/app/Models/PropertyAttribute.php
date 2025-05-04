@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PropertyAttribute extends Model
 {
+    public $timestamps = false;
+
     protected $fillable = [
         'property_id',
         'attribute_id',
@@ -19,6 +21,6 @@ class PropertyAttribute extends Model
 
     public function attribute()
     {
-        return $this->belongsTo(Attribute::class, 'attribute_id');
+        return $this->belongsTo(Attribute::class);
     }
 }

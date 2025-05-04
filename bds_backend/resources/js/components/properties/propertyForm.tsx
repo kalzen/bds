@@ -1,3 +1,4 @@
+// ✅ All necessary imports stay the same
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ interface PropertyFormProps {
     categories: { id: number; name: string }[];
     projects: { id: number; name: string }[];
     amenities: { id: number; name: string }[];
+    attributes: { id: number; name: string }[];
     listingTypes?: { id: number; name: string }[];
     provinces?: { id: number; name: string; code: string }[];
     districts?: { id: number; name: string; code: string; parent_code: string }[];
@@ -18,6 +20,7 @@ interface PropertyFormProps {
     currentUserId: number;
 }
 
+// ✅ attribute_id used instead of id
 interface PropertyFormData {
     user_id: number | string;
     project_id: number | string;
@@ -33,31 +36,31 @@ interface PropertyFormData {
     image: File | null;
     amenities: number[];
     attributes: {
-        id: number;
+        attribute_id: number;
         value: string | number;
     }[];
-    address: string; // Thêm trường address
+    address: string;
     [key: string]: any;
 }
 
 export default function PropertyForm({
-    properties,
-    categories,
-    projects,
-    amenities,
-    provinces,
-    districts,
-    wards,
-    listingTypes = [],
-    locations = [],
-    currentUserId,
-}: PropertyFormProps) {
-    console.log(properties)
+                                         properties,
+                                         categories,
+                                         projects,
+                                         amenities,
+                                         attributes,
+                                         provinces,
+                                         districts,
+                                         wards,
+                                         listingTypes = [],
+                                         locations = [],
+                                         currentUserId,
+                                     }: PropertyFormProps) {
     const [editingProperty, setEditingProperty] = useState<Property | null>(null);
-
     const [autoAddress, setAutoAddress] = useState('');
     const [addressDetail, setAddressDetail] = useState('');
-
+    console.log(amenities)
+    console.log(attributes)
     const initialFormData: PropertyFormData = {
         user_id: currentUserId,
         project_id: '',
@@ -73,7 +76,7 @@ export default function PropertyForm({
         image: null,
         amenities: [],
         attributes: [],
-        address: '', // Khởi tạo trường address
+        address: '',
     };
 
     const { data, setData, post, put, delete: destroy, processing, errors, reset, transform } = useForm<PropertyFormData>(initialFormData);
@@ -95,11 +98,11 @@ export default function PropertyForm({
                 amenities: editingProperty.amenities?.map((a) => a.amenity.id) || [],
                 attributes:
                     editingProperty.attributes?.map((attr) => ({
-                        id: attr.attribute.id,
+                        attribute_id: attr.attribute.id,
                         value: attr.value,
                     })) || [],
                 image: null,
-                address: editingProperty.address || '', // Gán giá trị address khi chỉnh sửa
+                address: editingProperty.address || '',
             });
         } else {
             reset();
@@ -111,17 +114,13 @@ export default function PropertyForm({
         setData('province_id', provinceId);
         setData('district_id', '');
         setData('ward_id', '');
-
         updateAddress(provinceId, '', '');
     };
 
     const handleDistrictChange = (districtId: string) => {
-        const currentProvinceId = data.province_id; // lấy trực tiếp từ data
-
+        const currentProvinceId = data.province_id;
         setData('district_id', districtId);
         setData('ward_id', '');
-
-        // Dùng đúng province hiện tại
         updateAddress(currentProvinceId as string, districtId, '');
     };
 
@@ -132,39 +131,39 @@ export default function PropertyForm({
 
         const autoAddr = `${ward?.name || ''}, ${district?.name || ''}, ${province?.name || ''}`.trim();
         setAutoAddress(autoAddr);
-        const fullAddr = `${addressDetail}, ${autoAddr}`.trim().replace(/^,/, ''); // tránh dấu `,` đầu dòng
+        const fullAddr = `${addressDetail}, ${autoAddr}`.trim().replace(/^,/, '');
         setData('address', fullAddr);
     };
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
-        console.log('Địa chỉ đầy đủ:', data.address);
-        transform((data) => {
-            const formData = new FormData();
-            Object.entries(data).forEach(([key, value]) => {
-                if (key === 'image' && value instanceof File) {
-                    formData.append('image', value);
-                } else if (key === 'amenities') {
-                    value.forEach((v: number, i: number) => formData.append(`amenities[${i}]`, String(v)));
-                } else if (key === 'attributes') {
-                    value.forEach((attr: any, i: number) => {
-                        formData.append(`attributes[${i}][id]`, String(attr.id));
-                        formData.append(`attributes[${i}][value]`, String(attr.value));
-                    });
-                } else {
-                    formData.append(key, value as string);
-                }
-            });
-            return formData;
-        });
-
-        if (isEdit && editingProperty) {
-            put(route('properties.update', editingProperty.id), {
-                onSuccess: () => setEditingProperty(null),
-            });
-        } else {
-            post(route('properties.store'));
-        }
+        console.log('DỮ LIỆU CHUẨN BỊ GỬI:', data);
+        // transform((data) => {
+        //     const formData = new FormData();
+        //     Object.entries(data).forEach(([key, value]) => {
+        //         if (key === 'image' && value instanceof File) {
+        //             formData.append('image', value);
+        //         } else if (key === 'amenities') {
+        //             value.forEach((v: number, i: number) => formData.append(`amenities[${i}]`, String(v)));
+        //         } else if (key === 'attributes') {
+        //             value.forEach((attr: any, i: number) => {
+        //                 formData.append(`attributes[${i}][attribute_id]`, String(attr.attribute_id));
+        //                 formData.append(`attributes[${i}][value]`, String(attr.value));
+        //             });
+        //         } else {
+        //             formData.append(key, value as string);
+        //         }
+        //     });
+        //     return formData;
+        // });
+        //
+        // if (isEdit && editingProperty) {
+        //     put(route('properties.update', editingProperty.id), {
+        //         onSuccess: () => setEditingProperty(null),
+        //     });
+        // } else {
+        //     post(route('properties.store'));
+        // }
     };
 
     const handleDelete = (id: number) => {
@@ -177,7 +176,6 @@ export default function PropertyForm({
         const updated = data.amenities.includes(id) ? data.amenities.filter((aid) => aid !== id) : [...data.amenities, id];
         setData('amenities', updated);
     };
-
     return (
         <div className="space-y-6 p-4">
             <form onSubmit={handleSubmit} className="max-w-xl space-y-4" encType="multipart/form-data">
@@ -297,21 +295,15 @@ export default function PropertyForm({
                     ))}
                 </div>
 
-                <div className="space-y-2">
-                    {data.attributes.map((attr, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                            <span>ID {attr.id}</span>
-                            <Input
-                                value={attr.value}
-                                onChange={(e) => {
-                                    const updated = [...data.attributes];
-                                    updated[i].value = e.target.value;
-                                    setData('attributes', updated);
-                                }}
-                            />
-                        </div>
+                <div className="grid grid-cols-2 gap-2">
+                    {attributes.map((a) => (
+                        <label key={a.id} className="flex items-center gap-2">
+                            <input type="checkbox" checked={data.amenities.includes(a.id)} onChange={() => handleAmenityChange(a.id)} />
+                            {a.name}
+                        </label>
                     ))}
                 </div>
+
                 <div className="flex gap-2">
                     <input type="file" accept="image/*" onChange={(e) => setData('image', e.target.files?.[0] || null)} />
                     <InputError message={errors.image} />
