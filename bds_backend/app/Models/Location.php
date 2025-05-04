@@ -6,10 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Location extends Model
 {
-    protected $fillable = ['name', 'district_id', 'latitude', 'longitude'];
+    protected $fillable = ['address' ];
 
-    public function district()
-    {
-        return $this->belongsTo(District::class);
-    }
 }

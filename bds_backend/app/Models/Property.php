@@ -52,7 +52,8 @@ class Property extends Model implements HasMedia
     public function attributes()
     {
         return $this->belongsToMany(Attribute::class, 'property_attributes')
-            ->withPivot('value');
+            ->withPivot('value')
+            ->withTimestamps(); // nếu bảng có timestamps
     }
 
     public function amenities()

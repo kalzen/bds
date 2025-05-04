@@ -13,7 +13,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Location({
+export default function FeaturesManagement({
     attribute = [],
     amenties = [],
     listing_types = [],

@@ -8,7 +8,7 @@ class PropertyAttribute extends Model
 {
     protected $fillable = [
         'property_id',
-        'attribute_name',
+        'attribute_id',
         'value',
     ];
 
@@ -16,5 +16,9 @@ class PropertyAttribute extends Model
     {
         return $this->belongsTo(Property::class);
     }
-}
 
+    public function attribute()
+    {
+        return $this->belongsTo(Attribute::class, 'attribute_id');
+    }
+}

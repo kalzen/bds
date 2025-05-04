@@ -28,7 +28,14 @@ class PropertyController extends Controller
 
 
         return Inertia::render('projects/properties/propertyManagement', [
-            'properties' => Property::all(),
+            'properties' => Property::with([
+                'category:id,name',
+                'project:id,name',
+                'listingType:id,name',
+                'location:id,address',
+                'attributes:id,name',
+                'media',
+            ])->get(),
             'categories' => PropertyCategory::all(['id', 'name']),
             'projects' => Project::all(['id', 'name']),
             'amenities' => Amenity::all(['id', 'name']),
@@ -77,7 +84,7 @@ class PropertyController extends Controller
             // Cập nhật location_id trong $data với id của location mới tạo
             $data['location_id'] = $location->id;
         }
-
+        $data['user_id'] = auth()->id();
         // Tạo mới bất động sản
         $property = $this->service->create($data);
 
