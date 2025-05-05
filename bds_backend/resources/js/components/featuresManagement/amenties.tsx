@@ -4,8 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
 import { Amenities } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Table } from '@/components/ui/table';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { Pencil, Trash2 } from 'lucide-react';
 
 interface AmenitiesFormProps {
     amenities: Amenities[];
@@ -17,13 +19,19 @@ export default function AmenitiesForm({ amenities }: AmenitiesFormProps) {
 
     const { data, setData, post, put, delete: destroy, processing, errors, reset } = useForm({
         name: editingAmenity?.name || '',
+        icon: editingAmenity?.icon || '',
+        description: editingAmenity?.description || '',
     });
 
     const isEdit = Boolean(editingAmenity);
 
     useEffect(() => {
         if (editingAmenity) {
-            setData('name', editingAmenity.name);
+            setData({
+                name: editingAmenity.name,
+                icon: editingAmenity.icon || '',
+                description: editingAmenity.description || '',
+            });
         } else {
             reset();
         }
@@ -52,92 +60,117 @@ export default function AmenitiesForm({ amenities }: AmenitiesFormProps) {
     );
 
     return (
-        <div className="p-4 space-y-6">
-            {/* Form to add or edit amenities */}
-            <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
-                <div className="grid gap-2">
-                    <Input
-                        id="name"
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                        disabled={processing}
-                        required
-                        placeholder="Nhập tên tiện ích"
-                    />
-                    <InputError message={errors.name} className="mt-2" />
-                </div>
+        <Card className="p-4 max-w-4xl mx-auto">
+            <CardHeader>
+                <CardTitle>{isEdit ? 'Chỉnh sửa tiện ích' : 'Thêm tiện ích mới'}</CardTitle>
+                <CardDescription>Quản lý các tiện ích của bất động sản</CardDescription>
+            </CardHeader>
 
-                <div className="flex gap-2">
-                    <Button type="submit" disabled={processing}>
-                        {processing ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo mới'}
-                    </Button>
-
-                    {isEdit && (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setEditingAmenity(null)}
+            <CardContent className="space-y-6">
+                <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                        <Input
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
                             disabled={processing}
-                        >
-                            Hủy chỉnh sửa
+                            required
+                            placeholder="Tên tiện ích"
+                        />
+                        <InputError message={errors.name} />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Input
+                            value={data.icon}
+                            onChange={(e) => setData('icon', e.target.value)}
+                            disabled={processing}
+                            placeholder="Tên icon (ví dụ: wifi, parking)"
+                        />
+                        <InputError message={errors.icon} />
+                    </div>
+
+                    <div className="sm:col-span-2 space-y-2">
+                        <Input
+                            value={data.description}
+                            onChange={(e) => setData('description', e.target.value)}
+                            disabled={processing}
+                            placeholder="Mô tả (tùy chọn)"
+                        />
+                        <InputError message={errors.description} />
+                    </div>
+
+                    <div className="col-span-2 flex gap-2">
+                        <Button type="submit" disabled={processing}>
+                            {processing ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo mới'}
                         </Button>
-                    )}
-                </div>
-            </form>
-
-            {/* Search input */}
-            <div className="max-w-md">
-                <Input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Tìm kiếm tiện ích..."
-                />
-            </div>
-
-            {/* Table to display amenities */}
-            <div className="mt-8">
-                <h2 className="text-lg font-semibold">Danh sách tiện ích</h2>
-                <ScrollArea className="max-w-full mt-4">
-                    <Table className="min-w-full">
-                        <thead>
-                        <tr>
-                            <th className="border px-4 py-2">Tên tiện ích</th>
-                            <th className="border px-4 py-2">Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {filteredAmenities.length > 0 ? (
-                            filteredAmenities.map((amenity) => (
-                                <tr key={amenity.id}>
-                                    <td className="border px-4 py-2">{amenity.name}</td>
-                                    <td className="border px-4 py-2">
-                                        <button
-                                            onClick={() => setEditingAmenity(amenity)}
-                                            className="text-blue-600 hover:text-blue-800"
-                                        >
-                                            Sửa
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(amenity.id)}
-                                            className="ml-2 text-red-600 hover:text-red-800"
-                                        >
-                                            Xóa
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={2} className="text-center py-4">
-                                    Không tìm thấy tiện ích nào.
-                                </td>
-                            </tr>
+                        {isEdit && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => setEditingAmenity(null)}
+                                disabled={processing}
+                            >
+                                Hủy
+                            </Button>
                         )}
-                        </tbody>
+                    </div>
+                </form>
+
+                <div className="max-w-md">
+                    <Input
+                        type="text"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Tìm kiếm tiện ích..."
+                    />
+                </div>
+
+                <ScrollArea className="rounded-md border max-h-[400px]">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Tên</TableHead>
+                                <TableHead>Icon</TableHead>
+                                <TableHead>Mô tả</TableHead>
+                                <TableHead className="text-right">Thao tác</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredAmenities.length > 0 ? (
+                                filteredAmenities.map((amenity) => (
+                                    <TableRow key={amenity.id}>
+                                        <TableCell>{amenity.name}</TableCell>
+                                        <TableCell>{amenity.icon}</TableCell>
+                                        <TableCell>{amenity.description}</TableCell>
+                                        <TableCell className="text-right space-x-2">
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                onClick={() => setEditingAmenity(amenity)}
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="icon"
+                                                onClick={() => handleDelete(amenity.id)}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                                        Không tìm thấy tiện ích nào.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
                     </Table>
                 </ScrollArea>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 }

@@ -105,23 +105,31 @@ export interface Ward{
     parent_code: string;
 }
 
-export interface Amenities{
+export interface Amenity {
     id: number;
     name: string;
+    description: string | null;
+    icon_url: string | null;
 }
 
-export interface Attributes{
+    export interface Attribute {
     id: number;
     name: string;
-    data_type : string;
+    data_type: string;
+    description: string ;
+    icon_url: string | null;
 }
 
-export interface ListingType{
+export interface ListingType {
     id: number;
     name: string;
+    description: string | null;
+    icon_url: string | null;
 }
 
-export interface PropertyCategory{
+export interface PropertyCategory {
     id: number;
     name: string;
+    description: string | null;
+    icon_url: string | null;
 }

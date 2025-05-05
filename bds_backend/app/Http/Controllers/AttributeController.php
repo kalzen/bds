@@ -16,10 +16,10 @@ class AttributeController extends Controller
         $this->attributeService = $attributeService;
     }
 
-    // ✅ Index - list attributes
+    // GET: /attributes
     public function index()
     {
-        $attributes = Attribute::all();
+        $attributes = Attribute::with('media')->get();
 
         return Inertia::render('Attributes/Index', [
             'attributes' => $attributes,
@@ -27,49 +27,76 @@ class AttributeController extends Controller
         ]);
     }
 
-    // ✅ Show create form
+    // GET: /attributes/create
     public function create()
     {
         return Inertia::render('Attributes/Create');
     }
 
-    // ✅ Store attribute
+    // POST: /attributes
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'data_type' => 'required|string|max:255', // 👈 đảm bảo validate & nhận đúng
+            'data_type' => 'required|string|max:100',
+            'description' => 'nullable|string|max:500',
+            'icon' => 'nullable|file|mimetypes:image/svg+xml|max:512', // chỉ cho SVG
         ]);
 
-        Attribute::create($validated);
+        // Tạo attribute không bao gồm icon
+        $attribute = Attribute::create([
+            'name' => $validated['name'],
+            'data_type' => $validated['data_type'],
+            'description' => $validated['description'] ?? null,
+        ]);
 
-        return redirect()->back()->with('message', 'Thuộc tính đã được tạo.');
+        // Nếu có upload icon thì lưu vào Media Library
+        if ($request->hasFile('icon')) {
+            $attribute
+                ->addMediaFromRequest('icon')
+                ->usingFileName('icon_' . uniqid() . '.svg')
+                ->toMediaCollection('icon', 'public'); // ensure using 'public' disk
+        }
+
+        return redirect()->route('features')->with('success', 'Thuộc tính đã được tạo.');
     }
 
 
-    // ✅ Show edit form
+    // GET: /attributes/{id}/edit
     public function edit($id)
     {
-        $attribute = $this->attributeService->getById($id);
+        $attribute = $this->attributeService->getById($id)->load('media');
 
         return Inertia::render('Attributes/Edit', [
             'attribute' => $attribute,
+            'icon_url' => $attribute->getFirstMediaUrl('icon'),
         ]);
     }
 
-    // ✅ Update attribute
+    // PUT/PATCH: /attributes/{id}
     public function update(Request $request, $id)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'data_type' => 'required|string|max:100',
+            'description' => 'nullable|string|max:500',
+            'icon' => 'nullable|file|mimetypes:image/svg+xml|max:512',
         ]);
 
-        $this->attributeService->update($id, $data);
+        $attribute = $this->attributeService->update($id, $validated);
+
+        if ($request->hasFile('icon')) {
+            $attribute->clearMediaCollection('icon');
+            $attribute
+                ->addMediaFromRequest('icon')
+                ->usingFileName('icon_' . uniqid() . '.svg')
+                ->toMediaCollection('icon');
+        }
 
         return redirect()->route('features')->with('success', 'Cập nhật thành công.');
     }
 
-    // ✅ Delete attribute
+    // DELETE: /attributes/{id}
     public function destroy($id)
     {
         $this->attributeService->delete($id);

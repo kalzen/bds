@@ -11,6 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->string('data_type', 50);
+            $table->string('description');
             $table->timestamps();
         });
     }

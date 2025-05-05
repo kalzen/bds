@@ -4,6 +4,16 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
 import { PropertyCategory } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableRow,
+    TableHead,
+    TableCell,
+} from '@/components/ui/table';
 
 interface PropertiesCategoryFormProps {
     propertyCategories: PropertyCategory[];
@@ -12,7 +22,6 @@ interface PropertiesCategoryFormProps {
 export default function PropertiesCategoryForm({ propertyCategories }: PropertiesCategoryFormProps) {
     const [editingCategory, setEditingCategory] = useState<PropertyCategory | null>(null);
     const [search, setSearch] = useState('');
-    const [filteredCategories, setFilteredCategories] = useState(propertyCategories);
 
     const { data, setData, post, put, delete: destroy, processing, errors, reset } = useForm({
         name: editingCategory?.name || '',
@@ -27,14 +36,6 @@ export default function PropertiesCategoryForm({ propertyCategories }: Propertie
             reset();
         }
     }, [editingCategory]);
-
-    useEffect(() => {
-        setFilteredCategories(
-            propertyCategories.filter((category) =>
-                category.name.toLowerCase().includes(search.toLowerCase())
-            )
-        );
-    }, [search, propertyCategories]);
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -54,76 +55,101 @@ export default function PropertiesCategoryForm({ propertyCategories }: Propertie
         }
     };
 
+    const filteredCategories = propertyCategories.filter((category) =>
+        category.name.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
-        <div className="p-4 space-y-6">
-            <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
-                <div className="grid gap-2">
+        <Card className="max-w-4xl mx-auto">
+            <CardHeader>
+                <CardTitle>Quản lý danh mục</CardTitle>
+                <CardDescription>Thêm, chỉnh sửa hoặc xóa danh mục bất động sản</CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+                    <div>
+                        <Input
+                            id="name"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            disabled={processing}
+                            required
+                            placeholder="Nhập tên danh mục"
+                        />
+                        <InputError message={errors.name} className="mt-2" />
+                    </div>
+
+                    <div className="flex gap-2">
+                        <Button type="submit" disabled={processing}>
+                            {processing ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo mới'}
+                        </Button>
+                        {isEdit && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setEditingCategory(null)}
+                                disabled={processing}
+                            >
+                                Hủy chỉnh sửa
+                            </Button>
+                        )}
+                    </div>
+                </form>
+
+                {/* Search */}
+                <div className="max-w-md">
                     <Input
-                        id="name"
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                        disabled={processing}
-                        required
-                        placeholder="Nhập tên danh mục"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Tìm kiếm danh mục"
                     />
-                    <InputError message={errors.name} className="mt-2" />
                 </div>
 
-                <Button type="submit" disabled={processing}>
-                    {processing ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo mới'}
-                </Button>
-
-                {isEdit && (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        className="ml-2"
-                        onClick={() => setEditingCategory(null)}
-                        disabled={processing}
-                    >
-                        Hủy chỉnh sửa
-                    </Button>
-                )}
-            </form>
-
-            <div className="mt-8">
-                <h2 className="text-lg font-semibold">Danh sách danh mục</h2>
-                <Input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Tìm kiếm danh mục"
-                    className="mb-4"
-                />
-                <table className="min-w-full mt-4 table-auto">
-                    <thead>
-                        <tr>
-                            <th className="border px-4 py-2">Tên danh mục</th>
-                            <th className="border px-4 py-2">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredCategories.map((category) => (
-                            <tr key={category.id}>
-                                <td className="border px-4 py-2">{category.name}</td>
-                                <td className="border px-4 py-2">
-                                    <button
-                                        onClick={() => setEditingCategory(category)}
-                                        className="text-blue-600 hover:underline"
-                                    >
-                                        Sửa
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(category.id)}
-                                        className="ml-2 text-red-600 hover:underline"
-                                    >
-                                        Xóa
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                {/* Danh sách danh mục */}
+                <ScrollArea className="rounded-md border max-h-[400px]">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-1/2">Tên danh mục</TableHead>
+                                <TableHead className="text-right">Thao tác</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredCategories.length > 0 ? (
+                                filteredCategories.map((category) => (
+                                    <TableRow key={category.id}>
+                                        <TableCell>{category.name}</TableCell>
+                                        <TableCell className="text-right space-x-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setEditingCategory(category)}
+                                            >
+                                                Sửa
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => handleDelete(category.id)}
+                                            >
+                                                Xóa
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={2} className="text-center text-muted-foreground py-6">
+                                        Không tìm thấy danh mục nào.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
+            </CardContent>
+        </Card>
     );
 }
