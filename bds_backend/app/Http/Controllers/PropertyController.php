@@ -105,15 +105,17 @@ class PropertyController extends Controller
 
         // ✅ Gọi service để tạo mới property với dữ liệu đã xử lý
         $property = $this->service->create($data);
+        dd($property);
 
         // ✅ Lưu các thuộc tính EAV nếu có
         foreach ($data['attributes'] ?? [] as $attr) {
             PropertyAttribute::create([
-                'property_id' => $property->id, // Liên kết với bất động sản vừa tạo
-                'attribute_id' => $attr['id'], // ID của thuộc tính
-                'value' => $attr['value'], // Giá trị của thuộc tính
+                'property_id' => $property->id,
+                'attribute_id' => $attr['attribute_id'], // ✅ dùng đúng key
+                'value' => $attr['value'],
             ]);
         }
+
 
         // ✅ Nếu có upload hình ảnh, thêm vào media collection "properties"
         if ($request->hasFile('image')) {

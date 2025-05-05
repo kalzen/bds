@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
 import { Amenities } from '@/types';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Table } from '@/components/ui/table';
 
 interface AmenitiesFormProps {
     amenities: Amenities[];
@@ -96,43 +98,45 @@ export default function AmenitiesForm({ amenities }: AmenitiesFormProps) {
             {/* Table to display amenities */}
             <div className="mt-8">
                 <h2 className="text-lg font-semibold">Danh sách tiện ích</h2>
-                <table className="min-w-full mt-4 table-auto">
-                    <thead>
-                    <tr>
-                        <th className="border px-4 py-2">Tên tiện ích</th>
-                        <th className="border px-4 py-2">Thao tác</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {filteredAmenities.length > 0 ? (
-                        filteredAmenities.map((amenity) => (
-                            <tr key={amenity.id}>
-                                <td className="border px-4 py-2">{amenity.name}</td>
-                                <td className="border px-4 py-2">
-                                    <button
-                                        onClick={() => setEditingAmenity(amenity)}
-                                        className="text-blue-600"
-                                    >
-                                        Sửa
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(amenity.id)}
-                                        className="ml-2 text-red-600"
-                                    >
-                                        Xóa
-                                    </button>
+                <ScrollArea className="max-w-full mt-4">
+                    <Table className="min-w-full">
+                        <thead>
+                        <tr>
+                            <th className="border px-4 py-2">Tên tiện ích</th>
+                            <th className="border px-4 py-2">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {filteredAmenities.length > 0 ? (
+                            filteredAmenities.map((amenity) => (
+                                <tr key={amenity.id}>
+                                    <td className="border px-4 py-2">{amenity.name}</td>
+                                    <td className="border px-4 py-2">
+                                        <button
+                                            onClick={() => setEditingAmenity(amenity)}
+                                            className="text-blue-600 hover:text-blue-800"
+                                        >
+                                            Sửa
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(amenity.id)}
+                                            className="ml-2 text-red-600 hover:text-red-800"
+                                        >
+                                            Xóa
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={2} className="text-center py-4">
+                                    Không tìm thấy tiện ích nào.
                                 </td>
                             </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan={2} className="text-center py-4">
-                                Không tìm thấy tiện ích nào.
-                            </td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
+                        )}
+                        </tbody>
+                    </Table>
+                </ScrollArea>
             </div>
         </div>
     );

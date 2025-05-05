@@ -20,7 +20,6 @@ interface PropertyFormProps {
     currentUserId: number;
 }
 
-// ✅ attribute_id used instead of id
 interface PropertyFormData {
     user_id: number | string;
     project_id: number | string;
@@ -40,27 +39,27 @@ interface PropertyFormData {
         value: string | number;
     }[];
     address: string;
+
     [key: string]: any;
 }
 
 export default function PropertyForm({
-                                         properties,
-                                         categories,
-                                         projects,
-                                         amenities,
-                                         attributes,
-                                         provinces,
-                                         districts,
-                                         wards,
-                                         listingTypes = [],
-                                         locations = [],
-                                         currentUserId,
-                                     }: PropertyFormProps) {
+    properties,
+    categories,
+    projects,
+    amenities,
+    attributes,
+    provinces,
+    districts,
+    wards,
+    listingTypes = [],
+    locations = [],
+    currentUserId,
+}: PropertyFormProps) {
     const [editingProperty, setEditingProperty] = useState<Property | null>(null);
     const [autoAddress, setAutoAddress] = useState('');
     const [addressDetail, setAddressDetail] = useState('');
-    console.log(amenities)
-    console.log(attributes)
+
     const initialFormData: PropertyFormData = {
         user_id: currentUserId,
         project_id: '',
@@ -135,9 +134,26 @@ export default function PropertyForm({
         setData('address', fullAddr);
     };
 
+    const handleAmenityChange = (id: number) => {
+        const updated = data.amenities.includes(id) ? data.amenities.filter((aid) => aid !== id) : [...data.amenities, id];
+        setData('amenities', updated);
+    };
+
+    const handleAttributeToggle = (id: number) => {
+        const exists = data.attributes.find((attr) => attr.attribute_id === id);
+        if (exists) {
+            setData(
+                'attributes',
+                data.attributes.filter((attr) => attr.attribute_id !== id),
+            );
+        } else {
+            setData('attributes', [...data.attributes, { attribute_id: id, value: '1' }]);
+        }
+    };
+
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
-        console.log('DỮ LIỆU CHUẨN BỊ GỬI:', data);
+        // console.log(data);
         // transform((data) => {
         //     const formData = new FormData();
         //     Object.entries(data).forEach(([key, value]) => {
@@ -154,16 +170,19 @@ export default function PropertyForm({
         //             formData.append(key, value as string);
         //         }
         //     });
+        //     for (const pair of formData.entries()) {
+        //         console.log(`${pair[0]}: ${pair[1]}`);
+        //     }
         //     return formData;
         // });
-        //
-        // if (isEdit && editingProperty) {
-        //     put(route('properties.update', editingProperty.id), {
-        //         onSuccess: () => setEditingProperty(null),
-        //     });
-        // } else {
-        //     post(route('properties.store'));
-        // }
+
+        if (isEdit && editingProperty) {
+            put(route('properties.update', editingProperty.id), {
+                onSuccess: () => setEditingProperty(null),
+            });
+        } else {
+            post(route('properties.store'));
+        }
     };
 
     const handleDelete = (id: number) => {
@@ -172,10 +191,8 @@ export default function PropertyForm({
         }
     };
 
-    const handleAmenityChange = (id: number) => {
-        const updated = data.amenities.includes(id) ? data.amenities.filter((aid) => aid !== id) : [...data.amenities, id];
-        setData('amenities', updated);
-    };
+    const isAttributeChecked = (id: number) => data.attributes.some((attr) => attr.attribute_id === id);
+
     return (
         <div className="space-y-6 p-4">
             <form onSubmit={handleSubmit} className="max-w-xl space-y-4" encType="multipart/form-data">
@@ -219,6 +236,7 @@ export default function PropertyForm({
                     ))}
                 </select>
 
+                {/* Province/District/Ward Selects */}
                 <select
                     value={data.province_id || ''}
                     onChange={(e) => handleProvinceChange(e.target.value)}
@@ -227,7 +245,7 @@ export default function PropertyForm({
                     <option value="">Chọn tỉnh/thành phố</option>
                     {provinces?.map((province) => (
                         <option key={province.id} value={province.code}>
-                            {province.id} - {province.name}
+                            {province.name}
                         </option>
                     ))}
                 </select>
@@ -240,10 +258,10 @@ export default function PropertyForm({
                 >
                     <option value="">Chọn quận/huyện</option>
                     {districts
-                        ?.filter((district) => district.parent_code === data.province_id)
+                        ?.filter((d) => d.parent_code === data.province_id)
                         .map((district) => (
                             <option key={district.id} value={district.code}>
-                                {district.parent_code} - {district.name}
+                                {district.name}
                             </option>
                         ))}
                 </select>
@@ -254,23 +272,22 @@ export default function PropertyForm({
                     onChange={(e) => {
                         const wardCode = e.target.value;
                         setData('ward_id', wardCode);
-                        updateAddress(data.province_id as string, data.district_id as string, wardCode); // Thêm dòng này!
+                        updateAddress(data.province_id as string, data.district_id as string, wardCode);
                     }}
                     className="w-full rounded border px-2 py-1"
                 >
                     <option value="">Chọn phường/xã</option>
                     {wards
-                        ?.filter((ward) => ward.parent_code === data.district_id)
+                        ?.filter((w) => w.parent_code === data.district_id)
                         .map((ward) => (
                             <option key={ward.id} value={ward.code}>
                                 {ward.name}
                             </option>
                         ))}
                 </select>
-
                 <InputError message={errors.ward_id} />
 
-                {/* Hiển thị địa chỉ */}
+                {/* Address Detail Input */}
                 <div className="mt-2">
                     <label>Địa chỉ</label>
                     <input
@@ -286,6 +303,7 @@ export default function PropertyForm({
                     />
                 </div>
 
+                {/* Amenities */}
                 <div className="grid grid-cols-2 gap-2">
                     {amenities.map((a) => (
                         <label key={a.id} className="flex items-center gap-2">
@@ -295,19 +313,23 @@ export default function PropertyForm({
                     ))}
                 </div>
 
+                {/* Attributes */}
                 <div className="grid grid-cols-2 gap-2">
                     {attributes.map((a) => (
                         <label key={a.id} className="flex items-center gap-2">
-                            <input type="checkbox" checked={data.amenities.includes(a.id)} onChange={() => handleAmenityChange(a.id)} />
+                            <input type="checkbox" checked={isAttributeChecked(a.id)} onChange={() => handleAttributeToggle(a.id)} />
                             {a.name}
                         </label>
                     ))}
                 </div>
 
+                {/* Image Upload */}
                 <div className="flex gap-2">
                     <input type="file" accept="image/*" onChange={(e) => setData('image', e.target.files?.[0] || null)} />
                     <InputError message={errors.image} />
                 </div>
+
+                {/* Submit/Delete */}
                 <div className="flex gap-2">
                     <Button type="submit" disabled={processing}>
                         {processing ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Thêm mới'}

@@ -2,8 +2,13 @@ import { useForm } from '@inertiajs/react';
 import { useState, useEffect, FormEventHandler } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import InputError from '@/components/input-error';
 import { Attributes } from '@/types';
+import { Pencil, Trash2 } from 'lucide-react';
 
 interface AttributesFormProps {
     attributes: Attributes[];
@@ -52,102 +57,102 @@ export default function AttributesForm({ attributes }: AttributesFormProps) {
     );
 
     return (
-        <div className="p-4 space-y-6">
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
-                <div className="grid gap-2">
-                    <Input
-                        id="name"
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                        disabled={processing}
-                        required
-                        placeholder="Nhập tên thuộc tính"
-                    />
-                    <InputError message={errors.name} className="mt-2" />
-
-                    <Input
-                        id="data_type"
-                        value={data.data_type}
-                        onChange={(e) => setData('data_type', e.target.value)}
-                        disabled={processing}
-                        required
-                        placeholder="Nhập kiểu dữ liệu"
-                    />
-                    <InputError message={errors.data_type} className="mt-2" />
-                </div>
-
-                <div className="flex gap-2">
-                    <Button type="submit" disabled={processing}>
-                        {processing ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo mới'}
-                    </Button>
-
-                    {isEdit && (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setEditingAttribute(null)}
+        <Card className="p-4">
+            <CardHeader>
+                <CardTitle>{isEdit ? 'Chỉnh sửa thuộc tính' : 'Thêm thuộc tính mới'}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                        <Input
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
                             disabled={processing}
-                        >
-                            Hủy chỉnh sửa
+                            required
+                            placeholder="Tên thuộc tính"
+                        />
+                        <InputError message={errors.name} className="text-sm text-red-500" />
+                    </div>
+                    <div className="space-y-2">
+                        <Input
+                            value={data.data_type}
+                            onChange={(e) => setData('data_type', e.target.value)}
+                            disabled={processing}
+                            required
+                            placeholder="Kiểu dữ liệu (ví dụ: string, number)"
+                        />
+                        <InputError message={errors.data_type} className="text-sm text-red-500" />
+                    </div>
+
+                    <div className="col-span-2 flex gap-2">
+                        <Button type="submit" disabled={processing}>
+                            {processing ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo mới'}
                         </Button>
-                    )}
+                        {isEdit && (
+                            <Button type="button" variant="ghost" onClick={() => setEditingAttribute(null)} disabled={processing}>
+                                Hủy
+                            </Button>
+                        )}
+                    </div>
+                </form>
+
+                <Separator />
+
+                {/* Search */}
+                <div className="max-w-sm">
+                    <Input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Tìm kiếm thuộc tính..."
+                    />
                 </div>
-            </form>
 
-            {/* Search input */}
-            <div className="max-w-md">
-                <Input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Tìm kiếm thuộc tính..."
-                />
-            </div>
-
-            {/* Table */}
-            <div className="mt-8">
-                <h2 className="text-lg font-semibold">Danh sách thuộc tính</h2>
-                <table className="min-w-full mt-4 table-auto">
-                    <thead>
-                    <tr>
-                        <th className="border px-4 py-2">Tên thuộc tính</th>
-                        <th className="border px-4 py-2">Kiểu dữ liệu</th>
-                        <th className="border px-4 py-2">Thao tác</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {filteredAttributes.length > 0 ? (
-                        filteredAttributes.map((attribute) => (
-                            <tr key={attribute.id}>
-                                <td className="border px-4 py-2">{attribute.name}</td>
-                                <td className="border px-4 py-2">{attribute.data_type}</td>
-                                <td className="border px-4 py-2">
-                                    <button
-                                        onClick={() => setEditingAttribute(attribute)}
-                                        className="text-blue-600"
-                                    >
-                                        Sửa
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(attribute.id)}
-                                        className="ml-2 text-red-600"
-                                    >
-                                        Xóa
-                                    </button>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan={3} className="text-center py-4">
-                                Không tìm thấy thuộc tính nào.
-                            </td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                {/* Table */}
+                <ScrollArea className="max-h-[400px]">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Tên</TableHead>
+                                <TableHead>Kiểu dữ liệu</TableHead>
+                                <TableHead className="text-right">Thao tác</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredAttributes.length > 0 ? (
+                                filteredAttributes.map((attribute) => (
+                                    <TableRow key={attribute.id}>
+                                        <TableCell>{attribute.name}</TableCell>
+                                        <TableCell>{attribute.data_type}</TableCell>
+                                        <TableCell className="text-right space-x-2">
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                onClick={() => setEditingAttribute(attribute)}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="icon"
+                                                onClick={() => handleDelete(attribute.id)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={3} className="text-center text-muted-foreground py-4">
+                                        Không tìm thấy thuộc tính nào.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
+            </CardContent>
+        </Card>
     );
 }
