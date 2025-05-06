@@ -12,6 +12,7 @@ class Amenity extends Model implements HasMedia
     use HasFactory, InteractsWithMedia;
 
     protected $fillable = ['name', 'description'];
+    protected $appends = ['icon_url'];
 
     public function listings()
     {
@@ -19,7 +20,7 @@ class Amenity extends Model implements HasMedia
     }
 
     // Accessor để lấy URL của icon
-    public function getIconUrlAmenity(): ?string
+    public function getIconUrlAttribute (): ?string
     {
         return $this->getFirstMediaUrl('icon');
     }

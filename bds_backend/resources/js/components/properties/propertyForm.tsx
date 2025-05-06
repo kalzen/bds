@@ -153,28 +153,28 @@ export default function PropertyForm({
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
-        // console.log(data);
-        // transform((data) => {
-        //     const formData = new FormData();
-        //     Object.entries(data).forEach(([key, value]) => {
-        //         if (key === 'image' && value instanceof File) {
-        //             formData.append('image', value);
-        //         } else if (key === 'amenities') {
-        //             value.forEach((v: number, i: number) => formData.append(`amenities[${i}]`, String(v)));
-        //         } else if (key === 'attributes') {
-        //             value.forEach((attr: any, i: number) => {
-        //                 formData.append(`attributes[${i}][attribute_id]`, String(attr.attribute_id));
-        //                 formData.append(`attributes[${i}][value]`, String(attr.value));
-        //             });
-        //         } else {
-        //             formData.append(key, value as string);
-        //         }
-        //     });
-        //     for (const pair of formData.entries()) {
-        //         console.log(`${pair[0]}: ${pair[1]}`);
-        //     }
-        //     return formData;
-        // });
+        console.log(data);
+        transform((data) => {
+            const formData = new FormData();
+            Object.entries(data).forEach(([key, value]) => {
+                if (key === 'image' && value instanceof File) {
+                    formData.append('image', value);
+                } else if (key === 'amenities') {
+                    value.forEach((v: number, i: number) => formData.append(`amenities[${i}]`, String(v)));
+                } else if (key === 'attributes') {
+                    value.forEach((attr: any, i: number) => {
+                        formData.append(`attributes[${i}][attribute_id]`, String(attr.attribute_id));
+                        formData.append(`attributes[${i}][value]`, String(attr.value));
+                    });
+                } else {
+                    formData.append(key, value as string);
+                }
+            });
+            for (const pair of formData.entries()) {
+                console.log(`${pair[0]}: ${pair[1]}`);
+            }
+            return formData;
+        });
 
         if (isEdit && editingProperty) {
             put(route('properties.update', editingProperty.id), {

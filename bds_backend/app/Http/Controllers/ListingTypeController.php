@@ -19,7 +19,7 @@ class ListingTypeController extends Controller
     // ✅ Index - list listing types
     public function index()
     {
-        $listingTypes = ListingType::all();
+        $listingTypes = ListingType::with('media')->get();
 
         return Inertia::render('ListingTypes/Index', [
             'listingTypes' => $listingTypes,
@@ -33,17 +33,31 @@ class ListingTypeController extends Controller
         return Inertia::render('ListingTypes/Create');
     }
 
-    // ✅ Store listing type
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'icon'        => 'nullable|file|mimetypes:image/svg+xml|max:512',
         ]);
 
-        $this->listingTypeService->create($data);
+        // Tạo ListingType đúng
+        $listType = ListingType::create([
+            'name'        => $data['name'],
+            'description' => $data['description'] ?? null,
+        ]);
+
+        // Lưu icon nếu có
+        if ($request->hasFile('icon')) {
+            $listType
+                ->addMediaFromRequest('icon')
+                ->usingFileName('icon_' . uniqid() . '.svg')
+                ->toMediaCollection('icon', 'public');
+        }
 
         return redirect()->route('features')->with('success', 'Loại danh sách đã được tạo.');
     }
+
 
     // ✅ Show edit form
     public function edit($id)
@@ -60,9 +74,20 @@ class ListingTypeController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'icon' => 'nullable|file|mimetypes:image/svg+xml|max:512', // chỉ cho SVG
         ]);
 
-        $this->listingTypeService->update($id, $data);
+
+        $listingType = $this->listingTypeService->update($id, $data);
+
+        if ($request->hasFile('icon')) {
+            $listingType->clearMediaCollection('icon');
+            $listingType
+                ->addMediaFromRequest('icon')
+                ->usingFileName('icon_' . uniqid() . '.svg')
+                ->toMediaCollection('icon');
+        }
 
         return redirect()->route('features')->with('success', 'Cập nhật thành công.');
     }

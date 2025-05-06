@@ -10,11 +10,13 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class ListingType extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'description'];
+    protected $appends = ['icon_url'];
 
-    public function getIconUrlListingType(): ?string
+    public function getIconUrlAttribute (): ?string
     {
-        return $this->getFirstMediaUrl('icon');
+        $media = $this->getFirstMedia('icon');
+        return $media ? url($media->getUrl()) : null;
     }
 
 }

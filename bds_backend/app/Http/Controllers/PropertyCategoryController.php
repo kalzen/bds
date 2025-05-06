@@ -35,9 +35,24 @@ class PropertyCategoryController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+            'icon' => 'nullable|file|mimetypes:image/svg+xml|max:512', // chỉ cho SVG
         ]);
 
-        $this->service->create($data);
+//        $this->service->create($data);
+
+        // Tạo category không bao gồm icon
+        $category = PropertyCategory::create([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+        ]);
+        if ($request->hasFile('icon')) {
+            $category
+                ->addMediaFromRequest('icon')
+                ->usingFileName('icon_' . uniqid() . '.svg')
+                ->toMediaCollection('icon', 'public'); // ensure using 'public' disk
+        }
+
 
         return redirect()->route('features')->with('success', 'Danh mục đã được tạo.');
     }

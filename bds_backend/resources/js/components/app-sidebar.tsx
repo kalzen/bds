@@ -20,7 +20,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Quản lý dự án',
-        href: '/properties',
+        href: '/projects',
         icon: LayoutGrid,
     },
     {

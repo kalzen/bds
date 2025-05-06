@@ -1,12 +1,13 @@
-import { useForm } from '@inertiajs/react';
 import { useState, useEffect, FormEventHandler } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import InputError from '@/components/input-error';
+import { Pencil, Trash2 } from 'lucide-react';
+import { router } from '@inertiajs/react';
 import { ListingType } from '@/types';
 
 interface ListingTypeFormProps {
@@ -16,42 +17,64 @@ interface ListingTypeFormProps {
 export default function ListingTypeForm({ listingTypes }: ListingTypeFormProps) {
     const [editingListingType, setEditingListingType] = useState<ListingType | null>(null);
     const [search, setSearch] = useState('');
-
-    const { data, setData, post, put, delete: destroy, processing, errors, reset } = useForm({
-        name: editingListingType?.name || '',
-        icon: editingListingType?.icon || '',
-        description: editingListingType?.description || '',
+    const [form, setForm] = useState({
+        name: '',
+        icon: null as File | null,
+        description: '',
     });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [processing, setProcessing] = useState(false);
 
     const isEdit = Boolean(editingListingType);
 
     useEffect(() => {
         if (editingListingType) {
-            setData({
+            setForm({
                 name: editingListingType.name,
-                icon: editingListingType.icon || '',
+                icon: null, // reset file input
                 description: editingListingType.description || '',
             });
         } else {
-            reset();
+            setForm({ name: '', icon: null, description: '' });
+            setErrors({});
         }
     }, [editingListingType]);
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
+        setProcessing(true);
 
+        const formData = new FormData();
+        formData.append('name', form.name);
+        formData.append('description', form.description);
+        if (form.icon) formData.append('icon', form.icon);
+
+        const onFinish = () => setProcessing(false);
+
+        console.log(form)
         if (isEdit && editingListingType) {
-            put(route('features.listing_types.update', editingListingType.id), {
-                onSuccess: () => setEditingListingType(null),
-            });
+            router.post(
+                route('features.listing_types.update', editingListingType.id),
+                { _method: 'PUT', ...Object.fromEntries(formData) },
+                {
+                    forceFormData: true,
+                    onSuccess: () => setEditingListingType(null),
+                    onError: (e) => setErrors(e),
+                    onFinish,
+                }
+            );
         } else {
-            post(route('features.listing_types.store'));
+            router.post(route('features.listing_types.store'), formData, {
+                forceFormData: true,
+                onError: (e) => setErrors(e),
+                onFinish,
+            });
         }
     };
 
     const handleDelete = (id: number) => {
         if (confirm('Bạn có chắc chắn muốn xóa loại danh sách này?')) {
-            destroy(route('features.listing_types.destroy', id));
+            router.delete(route('features.listing_types.destroy', id));
         }
     };
 
@@ -65,13 +88,13 @@ export default function ListingTypeForm({ listingTypes }: ListingTypeFormProps) 
                 <CardTitle>{isEdit ? 'Chỉnh sửa loại danh sách' : 'Thêm loại danh sách mới'}</CardTitle>
                 <CardDescription>Quản lý các loại danh sách bất động sản</CardDescription>
             </CardHeader>
-
             <CardContent className="space-y-6">
-                <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2" encType="multipart/form-data">
                     <div className="space-y-2">
                         <Input
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
+                            value={form.name}
+                            onChange={(e) => setForm({ ...form, name: e.target.value })}
                             disabled={processing}
                             required
                             placeholder="Tên loại danh sách"
@@ -80,44 +103,54 @@ export default function ListingTypeForm({ listingTypes }: ListingTypeFormProps) 
                     </div>
                     <div className="space-y-2">
                         <Input
-                            value={data.icon}
-                            onChange={(e) => setData('icon', e.target.value)}
+                            type="file"
+                            accept=".svg"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0] ?? null;
+                                setForm({ ...form, icon: file });
+                            }}
                             disabled={processing}
-                            placeholder="Tên icon (ví dụ: home, building)"
                         />
                         <InputError message={errors.icon} />
                     </div>
-                    <div className="sm:col-span-2 space-y-2">
+                    <div className="space-y-2 sm:col-span-2">
                         <Input
-                            value={data.description}
-                            onChange={(e) => setData('description', e.target.value)}
+                            value={form.description}
+                            onChange={(e) => setForm({ ...form, description: e.target.value })}
                             disabled={processing}
                             placeholder="Mô tả (tùy chọn)"
                         />
                         <InputError message={errors.description} />
                     </div>
-
                     <div className="col-span-2 flex gap-2">
                         <Button type="submit" disabled={processing}>
                             {processing ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo mới'}
                         </Button>
                         {isEdit && (
-                            <Button type="button" variant="ghost" onClick={() => setEditingListingType(null)} disabled={processing}>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => setEditingListingType(null)}
+                                disabled={processing}
+                            >
                                 Hủy
                             </Button>
                         )}
                     </div>
                 </form>
 
-                <div className="max-w-md">
+                <Separator />
+
+                {/* Search */}
+                <div className="max-w-sm">
                     <Input
-                        type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Tìm kiếm loại danh sách..."
                     />
                 </div>
 
+                {/* Table */}
                 <ScrollArea className="rounded-md border max-h-[400px]">
                     <Table>
                         <TableHeader>
@@ -133,7 +166,17 @@ export default function ListingTypeForm({ listingTypes }: ListingTypeFormProps) 
                                 filteredTypes.map((type) => (
                                     <TableRow key={type.id}>
                                         <TableCell>{type.name}</TableCell>
-                                        <TableCell>{type.icon}</TableCell>
+                                        <TableCell>
+                                            {type.icon_url ? (
+                                                <img
+                                                    src={type.icon_url}
+                                                    alt="Icon"
+                                                    className="h-6 w-6 object-contain rounded border"
+                                                />
+                                            ) : (
+                                                <span className="text-sm text-muted-foreground italic">Không có</span>
+                                            )}
+                                        </TableCell>
                                         <TableCell>{type.description}</TableCell>
                                         <TableCell className="text-right space-x-2">
                                             <Button

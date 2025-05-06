@@ -8,11 +8,20 @@ class Project extends Model
 {
     protected $fillable = [
         'name',
-        'location',
+        'investor',
+        'location_id',
+        'total_area',
+        'number_of_units',
         'description',
         'start_date',
         'end_date',
     ];
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
+
 
     public function properties()
     {

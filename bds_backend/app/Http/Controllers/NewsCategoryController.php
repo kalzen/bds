@@ -3,75 +3,77 @@
 namespace App\Http\Controllers;
 
 use App\Models\NewsCategory;
-use App\Services\NewsCategoryService;
+use App\Services\NewCategoryService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class NewsCategoryController extends Controller
 {
-    protected NewsCategoryService $newsCategoryService;
+    protected NewCategoryService $newsCategoryService;
 
-    public function __construct(NewsCategoryService $newsCategoryService)
+    public function __construct(NewCategoryService $newsCategoryService)
     {
         $this->newsCategoryService = $newsCategoryService;
     }
 
-    // ✅ Index - list news categories
+    // 📄 Danh sách
     public function index()
     {
         $newsCategories = NewsCategory::all();
 
-        return Inertia::render('NewsCategories/Index', [
-            'newsCategories' => $newsCategories,
-            'emptyMessage' => $newsCategories->isEmpty() ? 'Không có danh mục tin tức nào.' : null,
+        return Inertia::render('newscategory/NewCategoryManagement', [
+            'newscategory' => $newsCategories,
         ]);
     }
 
-    // ✅ Show create form
+    // ➕ Tạo mới
     public function create()
     {
-        return Inertia::render('NewsCategories/Create');
+        return Inertia::render('newscategory/Create');
     }
 
-    // ✅ Store news category
+    // 💾 Lưu mới
     public function store(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
         $this->newsCategoryService->create($data);
 
-        return redirect()->route('news-categories.index')->with('success', 'Danh mục tin tức đã được tạo.');
+        return redirect()->route('categories.index')->with('success', 'Danh mục đã được tạo.');
     }
 
-    // ✅ Show edit form
+    // 🖊️ Sửa
     public function edit($id)
     {
-        $newsCategory = $this->newsCategoryService->getById($id);
+        $category = $this->newsCategoryService->getById($id);
 
-        return Inertia::render('NewsCategories/Edit', [
-            'newsCategory' => $newsCategory,
+        return Inertia::render('NewsCategory/Edit', [
+            'category' => $category,
         ]);
     }
 
-    // ✅ Update news category
+    // 🔄 Cập nhật
     public function update(Request $request, $id)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
         $this->newsCategoryService->update($id, $data);
 
-        return redirect()->route('news-categories.index')->with('success', 'Cập nhật thành công.');
+        return redirect()->route('categories.index')->with('success', 'Danh mục đã được cập nhật.');
     }
 
-    // ✅ Delete news category
+    // ❌ Xoá
     public function destroy($id)
     {
         $this->newsCategoryService->delete($id);
 
-        return redirect()->route('news-categories.index')->with('success', 'Đã xoá danh mục tin tức.');
+        return redirect()->route('categories.index')->with('success', 'Danh mục đã bị xoá.');
     }
 }

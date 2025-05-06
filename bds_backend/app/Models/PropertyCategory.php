@@ -12,14 +12,17 @@ class PropertyCategory extends Model implements HasMedia
     use HasFactory, InteractsWithMedia;
 
     protected $fillable = ['name', 'description'];
+    protected $appends = ['icon_url'];
 
     public function properties()
     {
         return $this->hasMany(Property::class);
     }
 
-    public function getIconUrlAmenity(): ?string
+
+    public function getIconUrlAttribute()
     {
-        return $this->getFirstMediaUrl('icon');
+        $media = $this->getFirstMedia('icon');
+        return $media ? url($media->getUrl()) : null;
     }
 }

@@ -16,10 +16,10 @@ class AmenityController extends Controller
         $this->amenityService = $amenityService;
     }
 
-    // ✅ Index - list amenities
+    // GET: /amenities
     public function index()
     {
-        $amenities = Amenity::all();
+        $amenities = Amenity::with('media')->get();
 
         return Inertia::render('amenities/Index', [
             'amenities' => $amenities,
@@ -27,47 +27,70 @@ class AmenityController extends Controller
         ]);
     }
 
-    // ✅ Show create form
+    // GET: /amenities/create
     public function create()
     {
         return Inertia::render('amenities/Create');
     }
 
-    // ✅ Store amenity
+    // POST: /amenities
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'icon' => 'nullable|file|mimetypes:image/svg+xml|max:512',
         ]);
 
-        $this->amenityService->create($data);
+        $amenity = Amenity::create([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        if ($request->hasFile('icon')) {
+            $amenity
+                ->addMediaFromRequest('icon')
+                ->usingFileName('icon_' . uniqid() . '.svg')
+                ->toMediaCollection('icon', 'public');
+        }
 
         return redirect()->route('features')->with('success', 'Tiện ích đã được tạo.');
     }
 
-    // ✅ Show edit form
+    // GET: /amenities/{id}/edit
     public function edit($id)
     {
-        $amenity = $this->amenityService->getById($id);
+        $amenity = $this->amenityService->getById($id)->load('media');
 
         return Inertia::render('amenities/Edit', [
             'amenity' => $amenity,
+            'icon_url' => $amenity->getFirstMediaUrl('icon'),
         ]);
     }
 
-    // ✅ Update amenity
+    // PUT: /amenities/{id}
     public function update(Request $request, $id)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'icon' => 'nullable|file|mimetypes:image/svg+xml|max:512',
         ]);
 
-        $this->amenityService->update($id, $data);
+        $amenity = $this->amenityService->update($id, $validated);
+
+        if ($request->hasFile('icon')) {
+            $amenity->clearMediaCollection('icon');
+            $amenity
+                ->addMediaFromRequest('icon')
+                ->usingFileName('icon_' . uniqid() . '.svg')
+                ->toMediaCollection('icon');
+        }
 
         return redirect()->route('features')->with('success', 'Cập nhật thành công.');
     }
 
-    // ✅ Delete amenity
+    // DELETE: /amenities/{id}
     public function destroy($id)
     {
         $this->amenityService->delete($id);

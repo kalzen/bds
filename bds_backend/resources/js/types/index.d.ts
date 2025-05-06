@@ -28,6 +28,7 @@ export interface SharedData {
     auth: Auth;
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
+
     [key: string]: unknown;
 }
 
@@ -40,6 +41,7 @@ export interface User {
     created_at: string;
     updated_at: string;
     phone?: string;
+
     [key: string]: unknown;
 }
 
@@ -81,7 +83,26 @@ export interface Provinces {
     code: string;
 }
 
-export interface District{
+export interface Project {
+    id: number;
+    name: string;
+    investor: string;
+    number_of_units: string;
+    location_id: string;
+    total_area: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+    address: string;
+    province_id: number ;
+    district_id: number ;
+    ward_id: number;
+    location?: {
+        address: string;
+    };
+}
+
+export interface District {
     id: name;
     name: string;
     type: string;
@@ -93,7 +114,7 @@ export interface District{
     parent_code: string;
 }
 
-export interface Ward{
+export interface Ward {
     id: number;
     name: string;
     type: string;
@@ -112,11 +133,11 @@ export interface Amenity {
     icon_url: string | null;
 }
 
-    export interface Attribute {
+export interface Attribute {
     id: number;
     name: string;
     data_type: string;
-    description: string ;
+    description: string;
     icon_url: string | null;
 }
 
@@ -132,4 +153,25 @@ export interface PropertyCategory {
     name: string;
     description: string | null;
     icon_url: string | null;
+}
+
+export interface News {
+    id: number;
+    title : string;
+    slug: string;
+    description: string;
+    content : string;
+    user_id: string;
+    publish_date : string;
+    category?: {
+        name: string;
+    };
+    icon_url: string | null;
+}
+
+export interface NewsCategory {
+    id: number;
+    name: string;
+    slug: string;
+    description: string | null;
 }

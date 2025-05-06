@@ -1,57 +1,79 @@
-import { useForm } from '@inertiajs/react';
-import { useState, useEffect, FormEventHandler } from 'react';
+import { useState, useEffect, FormEventHandler, ChangeEvent } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import InputError from '@/components/input-error';
-import { Amenities } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { Separator } from '@/components/ui/separator';
+import InputError from '@/components/input-error';
+import { Amenity } from '@/types';
 import { Pencil, Trash2 } from 'lucide-react';
+import { router } from '@inertiajs/react';
 
 interface AmenitiesFormProps {
-    amenities: Amenities[];
+    amenities: Amenity[];
 }
 
 export default function AmenitiesForm({ amenities }: AmenitiesFormProps) {
-    const [editingAmenity, setEditingAmenity] = useState<Amenities | null>(null);
+    const [editingAmenity, setEditingAmenity] = useState<Amenity | null>(null);
     const [search, setSearch] = useState('');
-
-    const { data, setData, post, put, delete: destroy, processing, errors, reset } = useForm({
-        name: editingAmenity?.name || '',
-        icon: editingAmenity?.icon || '',
-        description: editingAmenity?.description || '',
+    const [form, setForm] = useState({
+        name: '',
+        icon: null as File | null,
+        description: '',
     });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [processing, setProcessing] = useState(false);
 
     const isEdit = Boolean(editingAmenity);
-
+    console.log(amenities)
     useEffect(() => {
         if (editingAmenity) {
-            setData({
+            setForm({
                 name: editingAmenity.name,
-                icon: editingAmenity.icon || '',
-                description: editingAmenity.description || '',
+                icon: null,
+                description: editingAmenity.description ?? '',
             });
         } else {
-            reset();
+            setForm({ name: '', icon: null, description: '' });
+            setErrors({});
         }
     }, [editingAmenity]);
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
+        setProcessing(true);
+
+        const formData = new FormData();
+        formData.append('name', form.name);
+        formData.append('description', form.description);
+        if (form.icon) formData.append('icon', form.icon);
+
+        const onFinish = () => setProcessing(false);
 
         if (isEdit && editingAmenity) {
-            put(route('features.amenities.update', editingAmenity.id), {
-                onSuccess: () => setEditingAmenity(null),
-            });
+            router.post(
+                route('features.amenities.update', editingAmenity.id),
+                { _method: 'PUT', ...Object.fromEntries(formData) },
+                {
+                    forceFormData: true,
+                    onSuccess: () => setEditingAmenity(null),
+                    onError: (e) => setErrors(e),
+                    onFinish,
+                }
+            );
         } else {
-            post(route('features.amenities.store'));
+            router.post(route('features.amenities.store'), formData, {
+                forceFormData: true,
+                onError: (e) => setErrors(e),
+                onFinish,
+            });
         }
     };
 
     const handleDelete = (id: number) => {
         if (confirm('Bạn có chắc chắn muốn xóa tiện ích này?')) {
-            destroy(route('features.amenities.destroy', id));
+            router.delete(route('features.amenities.destroy', id));
         }
     };
 
@@ -60,39 +82,40 @@ export default function AmenitiesForm({ amenities }: AmenitiesFormProps) {
     );
 
     return (
-        <Card className="p-4 max-w-4xl mx-auto">
+        <Card className="p-4">
+            <h1>Amenities</h1>
             <CardHeader>
                 <CardTitle>{isEdit ? 'Chỉnh sửa tiện ích' : 'Thêm tiện ích mới'}</CardTitle>
-                <CardDescription>Quản lý các tiện ích của bất động sản</CardDescription>
             </CardHeader>
-
             <CardContent className="space-y-6">
-                <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2" encType="multipart/form-data">
                     <div className="space-y-2">
                         <Input
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
+                            value={form.name}
+                            onChange={(e) => setForm({ ...form, name: e.target.value })}
                             disabled={processing}
                             required
                             placeholder="Tên tiện ích"
                         />
                         <InputError message={errors.name} />
                     </div>
-
                     <div className="space-y-2">
                         <Input
-                            value={data.icon}
-                            onChange={(e) => setData('icon', e.target.value)}
+                            type="file"
+                            accept=".svg"
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                const file = e.target.files?.[0] ?? null;
+                                setForm({ ...form, icon: file });
+                            }}
                             disabled={processing}
-                            placeholder="Tên icon (ví dụ: wifi, parking)"
                         />
                         <InputError message={errors.icon} />
                     </div>
-
-                    <div className="sm:col-span-2 space-y-2">
+                    <div className="space-y-2 sm:col-span-2">
                         <Input
-                            value={data.description}
-                            onChange={(e) => setData('description', e.target.value)}
+                            value={form.description}
+                            onChange={(e) => setForm({ ...form, description: e.target.value })}
                             disabled={processing}
                             placeholder="Mô tả (tùy chọn)"
                         />
@@ -116,21 +139,24 @@ export default function AmenitiesForm({ amenities }: AmenitiesFormProps) {
                     </div>
                 </form>
 
-                <div className="max-w-md">
+                <Separator />
+
+                {/* Search */}
+                <div className="max-w-sm">
                     <Input
-                        type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Tìm kiếm tiện ích..."
                     />
                 </div>
 
-                <ScrollArea className="rounded-md border max-h-[400px]">
+                {/* Table */}
+                <ScrollArea className="max-h-[400px]">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Tên</TableHead>
                                 <TableHead>Icon</TableHead>
+                                <TableHead>Tên</TableHead>
                                 <TableHead>Mô tả</TableHead>
                                 <TableHead className="text-right">Thao tác</TableHead>
                             </TableRow>
@@ -139,30 +165,32 @@ export default function AmenitiesForm({ amenities }: AmenitiesFormProps) {
                             {filteredAmenities.length > 0 ? (
                                 filteredAmenities.map((amenity) => (
                                     <TableRow key={amenity.id}>
+                                        <TableCell>
+                                            {amenity.icon_url ? (
+                                                <img
+                                                    src={amenity.icon_url}
+                                                    alt="Icon"
+                                                    className="h-6 w-6 object-contain rounded border"
+                                                />
+                                            ) : (
+                                                <span className="text-sm text-muted-foreground italic">Không có</span>
+                                            )}
+                                        </TableCell>
                                         <TableCell>{amenity.name}</TableCell>
-                                        <TableCell>{amenity.icon}</TableCell>
                                         <TableCell>{amenity.description}</TableCell>
                                         <TableCell className="text-right space-x-2">
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() => setEditingAmenity(amenity)}
-                                            >
-                                                <Pencil className="w-4 h-4" />
+                                            <Button variant="outline" size="icon" onClick={() => setEditingAmenity(amenity)}>
+                                                <Pencil className="h-4 w-4" />
                                             </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="icon"
-                                                onClick={() => handleDelete(amenity.id)}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
+                                            <Button variant="destructive" size="icon" onClick={() => handleDelete(amenity.id)}>
+                                                <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                                    <TableCell colSpan={4} className="text-center text-muted-foreground py-4">
                                         Không tìm thấy tiện ích nào.
                                     </TableCell>
                                 </TableRow>
