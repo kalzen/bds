@@ -57,11 +57,22 @@ export interface Property {
     description: string;
     price: number;
     amenities: PropertyAmenity[];
-    attributes: { attribute: { id: number; name: string }; value: string | number }[];
+    attributes: {
+        attribute: {
+            id: number;
+            name: string
+        }; value: string | number }[];
     media?: {
         id: number;
         original_url: string;
     }[];
+    category?: {
+        name: string;
+        icon_url: string;
+    };
+    location?: {
+        address: string;
+    };
 }
 
 export interface PropertyAmenity {

@@ -192,6 +192,11 @@ export default function PropertyForm({
     };
 
     const isAttributeChecked = (id: number) => data.attributes.some((attr) => attr.attribute_id === id);
+    const getAttributeValue = (id: number) => data.attributes.find((attr) => attr.attribute_id === id)?.value || '';
+    const handleAttributeValueChange = (id: number, value: string) => {
+        const updatedAttributes = data.attributes.map((attr) => (attr.attribute_id === id ? { ...attr, value } : attr));
+        setData('attributes', updatedAttributes);
+    };
 
     return (
         <div className="space-y-6 p-4">
@@ -313,13 +318,23 @@ export default function PropertyForm({
                     ))}
                 </div>
 
-                {/* Attributes */}
                 <div className="grid grid-cols-2 gap-2">
                     {attributes.map((a) => (
-                        <label key={a.id} className="flex items-center gap-2">
-                            <input type="checkbox" checked={isAttributeChecked(a.id)} onChange={() => handleAttributeToggle(a.id)} />
-                            {a.name}
-                        </label>
+                        <div key={a.id}>
+                            <label className="flex items-center gap-2">
+                                <input type="checkbox" checked={isAttributeChecked(a.id)} onChange={() => handleAttributeToggle(a.id)} />
+                                {a.name}
+                            </label>
+                            {isAttributeChecked(a.id) && (
+                                <input
+                                    type="text"
+                                    value={getAttributeValue(a.id)}
+                                    onChange={(e) => handleAttributeValueChange(a.id, e.target.value)}
+                                    className="mt-1 w-full rounded border px-2 py-1"
+                                    placeholder="Nhập giá trị..."
+                                />
+                            )}
+                        </div>
                     ))}
                 </div>
 

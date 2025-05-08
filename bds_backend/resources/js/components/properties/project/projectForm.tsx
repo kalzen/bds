@@ -1,17 +1,20 @@
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { District, Project, Provinces, Ward } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import {
-    Table,
-    TableHeader,
-    TableBody,
-    TableRow,
-    TableHead,
-    TableCell,
-} from '@/components/ui/table';
 
 interface ProjectFormProps {
     projects: Project[];
@@ -41,7 +44,7 @@ export default function ProjectForm({ projects, provinces, districts, wards, onS
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [autoAddress, setAutoAddress] = useState('');
     const [addressDetail, setAddressDetail] = useState('');
-    console.log(projects)
+    console.log(projects);
     const initialFormData: ProjectFormData = {
         name: '',
         investor: '',
@@ -100,8 +103,7 @@ export default function ProjectForm({ projects, provinces, districts, wards, onS
         e.preventDefault();
         const normalizedData = normalizeFormToProject(data);
 
-        console.log("data line95: ", data);
-
+        console.log('data line95: ', data);
 
         if (isEdit && editingProject) {
             put(route('projects.update', editingProject.id), {
@@ -111,7 +113,6 @@ export default function ProjectForm({ projects, provinces, districts, wards, onS
                     onSave(normalizedData);
                 },
             });
-
         } else {
             // Chuyển đổi kiểu nếu cần thiết
             const normalizedData = {
@@ -149,17 +150,13 @@ export default function ProjectForm({ projects, provinces, districts, wards, onS
             address: project.address,
         });
         setAddressDetail(project.address.split(',')[0] ?? '');
-        updateAddress(
-            String(project.province_id),
-            String(project.district_id),
-            String(project.ward_id)
-        );
+        updateAddress(String(project.province_id), String(project.district_id), String(project.ward_id));
     };
 
     const handleDelete = (projectId: number) => {
         if (!confirm('Bạn có chắc chắn muốn xóa dự án này?')) return;
 
-        destroy(route('projects.destroy',projectId), {
+        destroy(route('projects.destroy', projectId), {
             onSuccess: () => {
                 onSave({}); // Refresh or sync state post-delete
             },
@@ -175,59 +172,78 @@ export default function ProjectForm({ projects, provinces, districts, wards, onS
                 <Input placeholder="Nhà đầu tư" value={data.investor || ''} onChange={(e) => setData('investor', e.target.value)} />
                 <InputError message={errors.investor} />
 
-                <Input type={'number'} placeholder="Số bất động sản (Căn)" value={data.number_of_units || ''} onChange={(e) => setData('number_of_units', e.target.value)} />
+                <Input
+                    type={'number'}
+                    placeholder="Số bất động sản (Căn)"
+                    value={data.number_of_units || ''}
+                    onChange={(e) => setData('number_of_units', e.target.value)}
+                />
                 <InputError message={errors.number_of_units} />
 
-                {/* Province/District/Ward Selects */}
-                <select
-                    value={data.province_id || ''}
-                    onChange={(e) => handleProvinceChange(e.target.value)}
-                    className="w-full rounded border px-2 py-1"
-                >
-                    <option value="">Chọn tỉnh/thành phố</option>
-                    {provinces?.map((province) => (
-                        <option key={province.id} value={province.code}>
-                            {province.name}
-                        </option>
-                    ))}
-                </select>
+                {/* Province */}
+                <Select value={data.province_id?.toString() || ''} onValueChange={handleProvinceChange}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Chọn tỉnh/thành phố" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectLabel>Tỉnh/Thành</SelectLabel>
+                            {provinces?.map((province) => (
+                                <SelectItem key={province.id} value={province.code}>
+                                    {province.name}
+                                </SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
                 <InputError message={errors.province_id} />
 
-                <select
-                    value={data.district_id || ''}
-                    onChange={(e) => handleDistrictChange(e.target.value)}
-                    className="w-full rounded border px-2 py-1"
-                >
-                    <option value="">Chọn quận/huyện</option>
-                    {districts
-                        ?.filter((d) => d.parent_code === data.province_id)
-                        .map((district) => (
-                            <option key={district.id} value={district.code}>
-                                {district.name}
-                            </option>
-                        ))}
-                </select>
+                {/* District */}
+                <Select value={data.district_id?.toString() || ''} onValueChange={handleDistrictChange}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Chọn quận/huyện" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectLabel>Quận/Huyện</SelectLabel>
+                            {districts
+                                ?.filter((d) => d.parent_code === data.province_id)
+                                .map((district) => (
+                                    <SelectItem key={district.id} value={district.code}>
+                                        {district.name}
+                                    </SelectItem>
+                                ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
                 <InputError message={errors.district_id} />
 
-                <select
-                    value={data.ward_id || ''}
-                    onChange={(e) => {
-                        const wardCode = e.target.value;
+                {/* Ward */}
+                <Select
+                    value={data.ward_id?.toString() || ''}
+                    onValueChange={(wardCode) => {
                         setData('ward_id', wardCode);
                         updateAddress(data.province_id as string, data.district_id as string, wardCode);
                     }}
-                    className="w-full rounded border px-2 py-1"
                 >
-                    <option value="">Chọn phường/xã</option>
-                    {wards
-                        ?.filter((w) => w.parent_code === data.district_id)
-                        .map((ward) => (
-                            <option key={ward.id} value={ward.code}>
-                                {ward.name}
-                            </option>
-                        ))}
-                </select>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Chọn phường/xã" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectLabel>Phường/Xã</SelectLabel>
+                            {wards
+                                ?.filter((w) => w.parent_code === data.district_id)
+                                .map((ward) => (
+                                    <SelectItem key={ward.id} value={ward.code}>
+                                        {ward.name}
+                                    </SelectItem>
+                                ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
                 <InputError message={errors.ward_id} />
+
 
                 {/* Address Detail Input */}
                 <div className="mt-2">
@@ -248,7 +264,7 @@ export default function ProjectForm({ projects, provinces, districts, wards, onS
                 <Input placeholder="Tổng diện tích (m2)" value={data.total_area || ''} onChange={(e) => setData('total_area', e.target.value)} />
                 <InputError message={errors.total_area} />
 
-                <textarea placeholder="Mô tả" value={data.description || ''} onChange={(e) => setData('description', e.target.value)} />
+                <Textarea placeholder="Mô tả" value={data.description || ''} onChange={(e) => setData('description', e.target.value)} />
                 <InputError message={errors.description} />
 
                 <Input type="date" placeholder="Ngày bắt đầu" value={data.start_date || ''} onChange={(e) => setData('start_date', e.target.value)} />
@@ -276,11 +292,10 @@ export default function ProjectForm({ projects, provinces, districts, wards, onS
                 </div>
             </form>
 
-
             <div className="mt-6">
-                <h3 className="text-lg font-bold mb-4">Danh sách dự án</h3>
+                <h3 className="mb-4 text-lg font-bold">Danh sách dự án</h3>
 
-                <div className="rounded-md border overflow-auto">
+                <div className="overflow-auto rounded-md border">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -319,7 +334,7 @@ export default function ProjectForm({ projects, provinces, districts, wards, onS
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={9} className="text-center text-muted-foreground py-4">
+                                    <TableCell colSpan={9} className="text-muted-foreground py-4 text-center">
                                         Không có dự án nào.
                                     </TableCell>
                                 </TableRow>
