@@ -6,7 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class PropertyAttribute extends Model
 {
-    public $timestamps = false;
+    protected $table = 'property_attributes';
+
+    public $incrementing = false;
+    protected $primaryKey = null;
 
     protected $fillable = [
         'property_id',

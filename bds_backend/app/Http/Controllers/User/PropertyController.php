@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
 use App\Models\Amenity;
 use App\Models\Attribute;
@@ -9,7 +9,6 @@ use App\Models\ListingType;
 use App\Models\Location;
 use App\Models\Project;
 use App\Models\Property;
-use App\Models\PropertyAmenity;
 use App\Models\PropertyCategory;
 use App\Models\PropertyAttribute;
 use App\Models\Provinces;
@@ -28,24 +27,12 @@ class PropertyController extends Controller
             'listingType:id,name',
             'location:id,address',
             'media',
-            'propertyAttributes.attribute:id,name,data_type',
-            'propertyAmenities.amenity:id,name',
+            'propertyAttributes.attribute:id,name',
         ])->get()->map(function ($property) {
             $property->attribute_display = $property->propertyAttributes
                 ->map(function ($pa) {
-                    $name = $pa->attribute->name;
-                    $value = $pa->value;
-                    return "{$name}: {$value} ";
+                    return "{$pa->attribute->name}: {$pa->value}";
                 })
-                ->implode(', ');
-
-            $property->amenity_display = $property->propertyAmenities
-                ->map(function ($pa) {
-                    $name = $pa->amenity->name;
-                    $value = $pa->value;
-                    return "{$name}: {$value} ";
-                })
-                ->filter() // loại bỏ null nếu có
                 ->implode(', ');
 
             return $property;
@@ -89,7 +76,7 @@ class PropertyController extends Controller
             'location:id,address',
             'media',
             'propertyAttributes.attribute:id,name',
-            'propertyAmenities.amenity:id,name',
+            'amenities.amenity:id,name',
         ])->findOrFail($id);
 
         return Inertia::render('projects/properties/propertyManagement', [
@@ -122,10 +109,6 @@ class PropertyController extends Controller
             'attributes' => 'array',
             'attributes.*.attribute_id' => 'required|exists:attributes,id',
             'attributes.*.value' => 'nullable|string',
-            'amenities' => 'array',
-            'amenities.*.amenity_id' => 'required|exists:amenities,id',
-            'amenities.*.value' => 'nullable|string',
-
         ]);
 
         DB::transaction(function () use ($request, &$data) {
@@ -142,14 +125,6 @@ class PropertyController extends Controller
                     'property_id' => $property->id,
                     'attribute_id' => $attr['attribute_id'],
                     'value' => $attr['value'],
-                ]);
-            }
-
-            foreach ($data['amenities'] ?? [] as $amenity) {
-                \App\Models\PropertyAmenity::create([
-                    'property_id' => $property->id,
-                    'amenity_id' => $amenity['amenity_id'],
-                    'value' => $amenity['value'] ?? null,
                 ]);
             }
 
@@ -178,45 +153,28 @@ class PropertyController extends Controller
             'attributes' => 'array',
             'attributes.*.attribute_id' => 'required|exists:attributes,id',
             'attributes.*.value' => 'nullable|string',
-            'amenities' => 'array',
-            'amenities.*.amenity_id' => 'required|exists:amenities,id',
-            'amenities.*.value' => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($request, $id, &$data) {
             $property = Property::findOrFail($id);
             $property->update($data);
 
-            // Attributes
             foreach ($data['attributes'] ?? [] as $attr) {
-                logger('⚠️ Attribute Raw:', $data['attributes']);
-
-                // Xoá nếu đã tồn tại
-                PropertyAttribute::where('property_id', $property->id)
-                    ->where('attribute_id', $attr['attribute_id'])
-                    ->delete();
-
-                // Tạo lại
-                PropertyAttribute::create([
+                logger('⚠️ ATTR UPDATE:');
+                logger([
                     'property_id' => $property->id,
-                    'attribute_id' => (int)$attr['attribute_id'],
-                    'value' => $attr['value'],
+                    'attribute'   => $attr,
                 ]);
-            }
 
-            // Amenities
-            foreach ($data['amenities'] ?? [] as $amenity) {
-                logger('⚠️ Amenity Raw:', $data['amenities']);
-
-                PropertyAmenity::where('property_id', $property->id)
-                    ->where('amenity_id', $amenity['amenity_id'])
-                    ->delete();
-
-                PropertyAmenity::create([
-                    'property_id' => $property->id,
-                    'amenity_id' => $amenity['amenity_id'],
-                    'value' => $amenity['value'],
-                ]);
+                PropertyAttribute::updateOrCreate(
+                    [
+                        'property_id' => $property->id,
+                        'attribute_id' => $attr['attribute_id'],
+                    ],
+                    [
+                        'value' => $attr['value'],
+                    ]
+                );
             }
 
             if ($request->hasFile('image')) {
@@ -224,7 +182,6 @@ class PropertyController extends Controller
                 $property->addMediaFromRequest('image')->toMediaCollection('properties');
             }
         });
-
 
         return redirect()->route('properties.index')->with('success', 'Cập nhật bất động sản thành công.');
     }

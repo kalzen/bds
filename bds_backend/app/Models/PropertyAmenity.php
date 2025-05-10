@@ -6,15 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class PropertyAmenity extends Model
 {
+    protected $table = 'property_amenities';
+
+    public $incrementing = false;
+    protected $primaryKey = null;
+
     protected $fillable = [
         'property_id',
-        'amenity_name',
-        'description',
+        'amenity_id',
+        'value',
     ];
 
-    public function property()
+    public function amenity()
     {
-        return $this->belongsTo(Property::class);
+        return $this->belongsTo(Amenity::class, 'amenity_id');
     }
 }
 

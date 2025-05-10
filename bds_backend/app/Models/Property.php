@@ -73,4 +73,9 @@ class Property extends Model implements HasMedia
         return $this->hasMany(PropertyAttribute::class);
     }
 
+    public function propertyAmenities()
+    {
+        return $this->hasMany(PropertyAmenity::class);
+    }
+
 }

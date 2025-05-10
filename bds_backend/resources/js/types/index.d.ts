@@ -56,9 +56,14 @@ export interface Property {
     address: string;
     description: string;
     price: number;
-    amenities: PropertyAmenity[];
+    // amenities: PropertyAmenity[];
     attributes: {
         attribute: {
+            id: number;
+            name: string
+        }; value: string | number }[];
+    amenities: {
+        amenitie: {
             id: number;
             name: string
         }; value: string | number }[];
@@ -73,6 +78,15 @@ export interface Property {
     location?: {
         address: string;
     };
+    listing_type?: {
+        icon_url: string;
+        name: string;
+    };
+    project?: {
+        name: string;
+    };
+    attribute_display?: string;
+    amenity_display?: string;
 }
 
 export interface PropertyAmenity {

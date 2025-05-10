@@ -8,6 +8,7 @@ import { FormEventHandler, useEffect, useState } from 'react';
 
 interface PropertyFormProps {
     properties: Property[];
+    property?: Property; // 👈 đây là dữ liệu property từ controller khi ở edit
     categories: { id: number; name: string }[];
     projects: { id: number; name: string }[];
     amenities: { id: number; name: string }[];
@@ -33,7 +34,10 @@ interface PropertyFormData {
     description: string;
     price: number | string;
     image: File | null;
-    amenities: number[];
+    amenities: {
+        amenity_id: number;
+        value: string | number;
+    }[];
     attributes: {
         attribute_id: number;
         value: string | number;
@@ -44,18 +48,19 @@ interface PropertyFormData {
 }
 
 export default function PropertyForm({
-    properties,
-    categories,
-    projects,
-    amenities,
-    attributes,
-    provinces,
-    districts,
-    wards,
-    listingTypes = [],
-    locations = [],
-    currentUserId,
-}: PropertyFormProps) {
+                                         properties,
+                                         property,
+                                         categories,
+                                         projects,
+                                         amenities,
+                                         attributes,
+                                         provinces,
+                                         districts,
+                                         wards,
+                                         listingTypes = [],
+                                         locations = [],
+                                         currentUserId,
+                                     }: PropertyFormProps) {
     const [editingProperty, setEditingProperty] = useState<Property | null>(null);
     const [autoAddress, setAutoAddress] = useState('');
     const [addressDetail, setAddressDetail] = useState('');
@@ -83,29 +88,45 @@ export default function PropertyForm({
     const isEdit = Boolean(editingProperty);
 
     useEffect(() => {
+        if (property) {
+            console.log(property);
+            setEditingProperty(property); // 👈 auto populate khi vào trang edit
+        }
+    }, [property]);
+
+    useEffect(() => {
         if (editingProperty) {
             setData({
-                ...data,
                 user_id: editingProperty.user_id || currentUserId,
                 project_id: editingProperty.project_id || '',
                 listing_type_id: editingProperty.listing_type_id || '',
                 category_id: editingProperty.category_id || '',
                 location_id: editingProperty.location_id || '',
+                province_id: '',
+                district_id: '',
+                ward_id: '',
                 name: editingProperty.name || '',
                 description: editingProperty.description || '',
                 price: editingProperty.price || '',
-                amenities: editingProperty.amenities?.map((a) => a.amenity.id) || [],
+                image: null,
+                amenities: editingProperty.amenities?.map((a) => ({
+                    amenity_id: a.amenitie.id,
+                    value: a.value || '',
+                })) || [],
                 attributes:
                     editingProperty.attributes?.map((attr) => ({
                         attribute_id: attr.attribute.id,
                         value: attr.value,
                     })) || [],
-                image: null,
-                address: editingProperty.address || '',
+                address: editingProperty.location?.address || '',
             });
-        } else {
-            reset();
-            setData('user_id', currentUserId);
+
+
+            const fullAddress = editingProperty.location?.address || '';
+            const [detail = '', ...rest] = fullAddress.split(',').map((s) => s.trim());
+
+            setAddressDetail(detail);
+            setAutoAddress(rest.join(', '));
         }
     }, [editingProperty]);
 
@@ -134,10 +155,28 @@ export default function PropertyForm({
         setData('address', fullAddr);
     };
 
-    const handleAmenityChange = (id: number) => {
-        const updated = data.amenities.includes(id) ? data.amenities.filter((aid) => aid !== id) : [...data.amenities, id];
+    const isAmenityChecked = (id: number) => data.amenities.some((a) => a.amenity_id === id);
+    const getAmenityValue = (id: number) => data.amenities.find((a) => a.amenity_id === id)?.value || '';
+
+    const handleAmenityToggle = (id: number) => {
+        const exists = data.amenities.find((a) => a.amenity_id === id);
+        if (exists) {
+            setData(
+                'amenities',
+                data.amenities.filter((a) => a.amenity_id !== id),
+            );
+        } else {
+            setData('amenities', [...data.amenities, { amenity_id: id, value: '1' }]);
+        }
+    };
+
+    const handleAmenityValueChange = (id: number, value: string) => {
+        const updated = data.amenities.map((a) =>
+            a.amenity_id === id ? { ...a, value } : a
+        );
         setData('amenities', updated);
     };
+
 
     const handleAttributeToggle = (id: number) => {
         const exists = data.attributes.find((attr) => attr.attribute_id === id);
@@ -154,13 +193,17 @@ export default function PropertyForm({
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         console.log(data);
+        const formData = new FormData();
         transform((data) => {
-            const formData = new FormData();
+
             Object.entries(data).forEach(([key, value]) => {
                 if (key === 'image' && value instanceof File) {
                     formData.append('image', value);
                 } else if (key === 'amenities') {
-                    value.forEach((v: number, i: number) => formData.append(`amenities[${i}]`, String(v)));
+                    value.forEach((attr: any, i: number) => {
+                        formData.append(`amenities[${i}][amenity_id]`, String(attr.amenity_id));
+                        formData.append(`amenities[${i}][value]`, String(attr.value));
+                    });
                 } else if (key === 'attributes') {
                     value.forEach((attr: any, i: number) => {
                         formData.append(`attributes[${i}][attribute_id]`, String(attr.attribute_id));
@@ -176,10 +219,23 @@ export default function PropertyForm({
             return formData;
         });
 
+
         if (isEdit && editingProperty) {
-            put(route('properties.update', editingProperty.id), {
-                onSuccess: () => setEditingProperty(null),
-            });
+            console.log(data)
+            formData.append('_method', 'PUT');
+
+            post(
+                isEdit && editingProperty
+                    ? route('properties.update', editingProperty.id)
+                    : route('properties.store'),
+                {
+                    forceFormData: true,
+                    onSuccess: () => {
+                        if (isEdit) setEditingProperty(null);
+                        reset();
+                    },
+                }
+            );
         } else {
             post(route('properties.store'));
         }
@@ -207,7 +263,14 @@ export default function PropertyForm({
                 <Input placeholder="Mô tả" value={data.description} onChange={(e) => setData('description', e.target.value)} />
                 <InputError message={errors.description} />
 
-                <Input type="number" placeholder="Giá" value={data.price} onChange={(e) => setData('price', e.target.value)} />
+                <Input
+                    type="number"
+                    placeholder="Giá"
+                    value={data.price}
+                    onChange={(e) =>
+                        setData('price', e.target.value.replace(/,/g, ''))
+                    }
+                />
                 <InputError message={errors.price} />
 
                 <select value={data.project_id} onChange={(e) => setData('project_id', e.target.value)} className="w-full rounded border px-2 py-1">
@@ -308,15 +371,26 @@ export default function PropertyForm({
                     />
                 </div>
 
-                {/* Amenities */}
                 <div className="grid grid-cols-2 gap-2">
                     {amenities.map((a) => (
-                        <label key={a.id} className="flex items-center gap-2">
-                            <input type="checkbox" checked={data.amenities.includes(a.id)} onChange={() => handleAmenityChange(a.id)} />
-                            {a.name}
-                        </label>
+                        <div key={a.id}>
+                            <label className="flex items-center gap-2">
+                                <input type="checkbox" checked={isAmenityChecked(a.id)} onChange={() => handleAmenityToggle(a.id)} />
+                                {a.name}
+                            </label>
+                            {isAmenityChecked(a.id) && (
+                                <input
+                                    type="text"
+                                    value={getAmenityValue(a.id)}
+                                    onChange={(e) => handleAmenityValueChange(a.id, e.target.value)}
+                                    className="mt-1 w-full rounded border px-2 py-1"
+                                    placeholder="Nhập giá trị..."
+                                />
+                            )}
+                        </div>
                     ))}
                 </div>
+
 
                 <div className="grid grid-cols-2 gap-2">
                     {attributes.map((a) => (
