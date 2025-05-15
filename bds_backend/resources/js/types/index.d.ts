@@ -45,6 +45,36 @@ export interface User {
     [key: string]: unknown;
 }
 
+
+export interface News {
+    id: number;
+    title: string;
+    slug: string;
+    description: string;
+    content: string;
+    user_id: string;
+    publish_date: string;
+    media?: {
+        id: number;
+        original_url: string;
+    }[];
+    category_id?: number; // Optional
+    category?: {
+        name: string;
+    };
+    user?: {
+        id: number;
+        full_name: string;
+    };
+}
+
+export interface NewsCategory {
+    id: number;
+    name: string;
+    slug: string;
+    description: string | null;
+}
+
 export interface Property {
     id: number;
     user_id?: number; // Optional
@@ -56,17 +86,20 @@ export interface Property {
     address: string;
     description: string;
     price: number;
-    // amenities: PropertyAmenity[];
     attributes: {
         attribute: {
             id: number;
-            name: string
-        }; value: string | number }[];
+            name: string;
+        };
+        value: string | number;
+    }[];
     amenities: {
         amenitie: {
             id: number;
-            name: string
-        }; value: string | number }[];
+            name: string;
+        };
+        value: string | number;
+    }[];
     media?: {
         id: number;
         original_url: string;
@@ -119,8 +152,8 @@ export interface Project {
     start_date: string;
     end_date: string;
     address: string;
-    province_id: number ;
-    district_id: number ;
+    province_id: number;
+    district_id: number;
     ward_id: number;
     location?: {
         address: string;
@@ -180,23 +213,3 @@ export interface PropertyCategory {
     icon_url: string | null;
 }
 
-export interface News {
-    id: number;
-    title : string;
-    slug: string;
-    description: string;
-    content : string;
-    user_id: string;
-    publish_date : string;
-    category?: {
-        name: string;
-    };
-    icon_url: string | null;
-}
-
-export interface NewsCategory {
-    id: number;
-    name: string;
-    slug: string;
-    description: string | null;
-}

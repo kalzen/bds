@@ -25,7 +25,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Quản lý danh sách bài viết',
-        href: '/properties',
+        href: '/news',
         icon: LayoutGrid,
     },
     {

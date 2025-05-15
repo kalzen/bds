@@ -54,7 +54,7 @@ class PropertyController extends Controller
         return Inertia::render('projects/properties/Index', [
             'properties' => $properties,
             'categories' => PropertyCategory::all(['id', 'name']),
-            'projects' => Project::all(['id', 'name']),
+            'projects' => Project::all(['id', 'name', 'investor']),
             'amenities' => Amenity::all(['id', 'name']),
             'attributes' => Attribute::all(['id', 'name', 'data_type']),
             'provinces' => Provinces::all(['id', 'name', 'code']),
@@ -127,7 +127,7 @@ class PropertyController extends Controller
             'amenities.*.value' => 'nullable|string',
 
         ]);
-
+        //tạo file frontend layout riêng
         DB::transaction(function () use ($request, &$data) {
             if ($request->has('address')) {
                 $location = \App\Models\Location::create(['address' => $request->input('address')]);

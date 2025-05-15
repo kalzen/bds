@@ -11,19 +11,19 @@ const breadcrumbs = [
 ];
 console.log('management');
 export default function PropertyManagementPage({
-                                                   property,
-                                                   properties = [],
-                                                   categories = [],
-                                                   projects = [],
-                                                   amenities = [],
-                                                   attributes = [],
-                                                   provinces = [],
-                                                   districts = [],
-                                                   wards = [],
-                                                   listing_types = [],
-                                                   emptyMessage = 'Không có bất động sản nào.',
-                                                   auth,
-                                               }: {
+    property,
+    properties = [],
+    categories = [],
+    projects = [],
+    amenities = [],
+    attributes = [],
+    provinces = [],
+    districts = [],
+    wards = [],
+    listing_types = [],
+    emptyMessage = 'Không có bất động sản nào.',
+    auth,
+}: {
     property?: Property;
     properties: Property[];
     categories: { id: number; name: string }[];

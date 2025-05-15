@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\News;
-use App\Services\NewsService;
+use App\Models\news;
+use App\Models\NewsCategory;
+use App\Services\newsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class NewsController extends Controller
+class newsController extends Controller
 {
-    protected NewsService $newsService;
+    protected newsService $newsService;
 
-    public function __construct(NewsService $newsService)
+    public function __construct(newsService $newsService)
     {
         $this->newsService = $newsService;
     }
@@ -19,9 +20,13 @@ class NewsController extends Controller
     // ✅ Index - list news
     public function index()
     {
-        $news = News::all();
+        $news = news::with([
+            'category:id,name',
+            'user:id,full_name',
+            'media',
+        ])->get();
 
-        return Inertia::render('News/Index', [
+        return Inertia::render('news/Index', [
             'news' => $news,
             'emptyMessage' => $news->isEmpty() ? 'Không có tin tức nào.' : null,
         ]);
@@ -30,30 +35,48 @@ class NewsController extends Controller
     // ✅ Show create form
     public function create()
     {
-        return Inertia::render('News/Create');
+        return Inertia::render('news/Form', [
+            'categories' => NewsCategory::all(['id', 'name']),
+            'auth' => ['user' => auth()->user()],
+        ]);
     }
 
     // ✅ Store news
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'required|string',
+            'slug' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+            'content' => 'required|string|max:65535',
+            'category_id' => 'required|integer|exists:news_categories,id',
+            'publish_date' => 'required|date',
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        $this->newsService->create($data);
+        $validated['user_id'] = auth()->id(); // ✅ Assign manually
+
+        $news = News::create($validated); // ✅ Correct method
+
+        if ($request->hasFile('image')) {
+            $news->addMediaFromRequest('image')->toMediaCollection('news'); // ✅ Collection name must match
+        }
 
         return redirect()->route('news.index')->with('success', 'Tin tức đã được tạo.');
     }
 
+
     // ✅ Show edit form
     public function edit($id)
     {
-        $news = $this->newsService->getById($id);
-
-        return Inertia::render('News/Edit', [
+        $news = News::findOrFail($id);
+        logger('INCOMING REQUEST', $news->toArray());
+        return Inertia::render('news/Form', [
             'news' => $news,
+            'categories' => NewsCategory::all(['id', 'name']),
+            'auth' => ['user' => auth()->user()],
         ]);
+
     }
 
     // ✅ Update news
@@ -61,13 +84,29 @@ class NewsController extends Controller
     {
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'required|string',
+            'slug' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+            'content' => 'required|string|max:65535',
+            'category_id' => 'required|integer|exists:news_categories,id',
+            'publish_date' => 'required|date',
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        $this->newsService->update($id, $data);
+        // ✅ Lấy bản ghi theo ID
+        $news = News::findOrFail($id);
+
+        // ✅ Gọi update() trên instance
+        $news->update($data);
+
+        // ✅ Cập nhật media nếu có ảnh mới
+        if ($request->hasFile('image')) {
+            $news->clearMediaCollection('news');
+            $news->addMediaFromRequest('image')->toMediaCollection('news');
+        }
 
         return redirect()->route('news.index')->with('success', 'Cập nhật thành công.');
     }
+
 
     // ✅ Delete news
     public function destroy($id)

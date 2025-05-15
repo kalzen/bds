@@ -33,8 +33,8 @@ export default function PropertyIndex({ properties, onEdit, onDelete, onCreate }
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-semibold">🏘️ Property Listings</h1>
-                <Button onClick={handleCreate}>+ Add Property</Button>
+                <h1 className="text-2xl font-semibold">🏘️ Bất động sản</h1>
+                <Button onClick={handleCreate}>+ Tạo mới bất động sản</Button>
             </div>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">

@@ -32,6 +32,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{id}', [\App\Http\Controllers\NewsCategoryController::class, 'destroy'])->name('destroy');
     });
 
+    Route::prefix('news')->name('news.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\NewsController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\NewsController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\NewsController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [\App\Http\Controllers\NewsController::class, 'edit'])->name('edit');
+        Route::post('/{id}', [\App\Http\Controllers\NewsController::class, 'update'])->name('update');
+        Route::delete('/{id}', [\App\Http\Controllers\NewsController::class, 'destroy'])->name('destroy');
+    });
+
      // Trang danh sách tất cả bất động sản
     Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index'])->name('project.index');
     Route::post('/projects', [\App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');

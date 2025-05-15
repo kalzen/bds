@@ -11,21 +11,22 @@ class News extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
     protected $fillable = ['title','slug', 'description', 'content', 'user_id', 'category_id','publish_date'];
-    protected $appends = ['icon_url'];
+    protected $appends = ['images'];
 
     public function category()
     {
         return $this->belongsTo(NewsCategory::class, 'category_id');
     }
 
-    public function userid()
+    public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
     // Accessor để lấy URL của icon
-    public function getIconUrlAttribute (): ?string
+    public function getImagesAttribute(): ?string
     {
-        return $this->getFirstMediaUrl('icon');
+        return $this->getFirstMediaUrl('images');
     }
+
 }
